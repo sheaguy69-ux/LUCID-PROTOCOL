@@ -1,0 +1,20 @@
+{
+  "name": "scamshield-bot",
+  "version": "1.0.0",
+  "description": "ScamShield - AI-powered Telegram bot for detecting crypto and investment scams",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "node bot.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
+    "@supabase/supabase-js": "^2.101.0",
+    "dotenv": "^16.4.0",
+    "express": "^4.21.0",
+    "node-telegram-bot-api": "^0.67.0"
+  }
+}
