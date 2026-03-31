@@ -114,17 +114,24 @@ function formatHelp() {
 
 function formatPremium() {
   return [
-    `*⭐ ScamShield Premium*`,
+    `*⭐ ScamShield API Pricing*`,
     ``,
-    `Unlock advanced protection:`,
+    `*Free Tier*`,
+    `• 100 API scans/month`,
+    `• Full analysis pipeline`,
+    `• Usage tracking dashboard`,
+    `• $0\\.05/scan overage after 100`,
     ``,
-    `• *Unlimited scans* \\(free tier: 20/day\\)`,
-    `• *Priority analysis* — faster response times`,
-    `• *Detailed reports* — full breakdown with sources`,
-    `• *Bulk scanning* — analyze multiple URLs at once`,
-    `• *API access* — integrate with your own tools`,
+    `*Unlimited — $28/mo*`,
+    `• Unlimited API scans`,
+    `• Priority analysis — faster response times`,
+    `• Bulk scanning — multiple URLs per request`,
+    `• Detailed reports with full source breakdown`,
+    `• No overage charges ever`,
     ``,
-    `_Coming soon\\! Stay tuned for launch\\._`,
+    `Telegram bot scanning is always free\\.`,
+    ``,
+    `_Use /apikey to get started with the free tier\\._`,
   ].join('\n');
 }
 

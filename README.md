@@ -156,8 +156,9 @@ curl https://your-app.up.railway.app/api/usage \
 
 | Tier | Scans | Cost |
 |------|-------|------|
-| Free | First 100/month | $0 |
+| Free | 100/month | $0 |
 | Overage | Each scan after 100 | $0.05/scan |
+| Unlimited | Unlimited | $28/mo |
 
 ### Key Types
 
