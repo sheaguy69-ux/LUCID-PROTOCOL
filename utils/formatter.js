@@ -99,6 +99,8 @@ function formatHelp() {
     `*Commands:*`,
     `/scan \\[text or URL\\] — Analyze for scam indicators`,
     `/report \\[description\\] — Submit a suspected scam`,
+    `/apikey — Generate an API key for developers`,
+    `/usage — View your API usage \\& billing`,
     `/status — Bot status \\& statistics`,
     `/premium — Upgrade to premium`,
     `/help — Show this message`,

@@ -189,6 +189,7 @@ async function getSubmissionsByUser(telegramUserId, limit = 10) {
 }
 
 module.exports = {
+  getSupabase,
   insertScamReport,
   getScamReportsByUser,
   getReportStats,

@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ override: true });
 
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
@@ -34,16 +34,28 @@ const registerScan = require('./commands/scan');
 const registerReport = require('./commands/report');
 const registerStatus = require('./commands/status');
 const registerPremium = require('./commands/premium');
+const registerApiKey = require('./commands/apikey');
+const registerUsage = require('./commands/usage');
 
 registerHelp(bot);
 registerScan(bot);
 registerReport(bot);
 registerStatus(bot);
 registerPremium(bot);
+registerApiKey(bot);
+registerUsage(bot);
+
+// --- Start usage tracking batch flush ---
+
+const { startBatchFlush, flushBuffer } = require('./usageTracking');
+startBatchFlush();
 
 // --- Express server (webhook mode + health check) ---
 
 const app = express();
+const apiRouter = require('./routes/api');
+
+app.use('/api', apiRouter);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', mode: BOT_MODE, uptime: process.uptime() });
@@ -85,8 +97,9 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err.message);
 });
 
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('SIGTERM received, shutting down...');
+  await flushBuffer();
   bot.stopPolling();
   process.exit(0);
 });
