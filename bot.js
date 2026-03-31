@@ -57,6 +57,21 @@ const apiRouter = require('./routes/api');
 
 app.use('/api', apiRouter);
 
+app.get('/', (req, res) => {
+  res.json({
+    name: 'ScamShield Bot',
+    description: 'AI-powered scam detection for crypto & investment fraud',
+    status: 'online',
+    endpoints: {
+      'POST /api/scan': 'Analyze content for scam indicators (API key required)',
+      'GET /api/usage': 'Check your API usage and billing (API key required)',
+      'GET /health': 'Service health check',
+    },
+    telegram: 'Search @YourBotUsername on Telegram to use for free',
+    docs: 'Pass Authorization: Bearer <your_api_key> header to authenticate',
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', mode: BOT_MODE, uptime: process.uptime() });
 });
