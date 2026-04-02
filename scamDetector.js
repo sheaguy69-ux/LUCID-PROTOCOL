@@ -1,5 +1,6 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const { parseInput, encodeUrlForVT, getDomain } = require('./utils/urlExtractor');
+const { generateEmbedding, findSimilarScams } = require('./embeddingEngine');
 
 let anthropic = null;
 
@@ -189,23 +190,46 @@ Return ONLY valid JSON with this exact structure:
   }
 }
 
+// --- Semantic Similarity Search ---
+
+async function findSemanticMatches(input) {
+  try {
+    const embedding = await generateEmbedding(input);
+    if (!embedding) return { matches: [], bestMatch: null };
+
+    const matches = await findSimilarScams(embedding, 3);
+    return {
+      matches: matches.map((m) => ({
+        pattern: m.pattern,
+        similarity: Math.round(m.similarity * 100),
+        severity: m.severity,
+      })),
+      bestMatch: matches[0] || null,
+    };
+  } catch (err) {
+    console.error('Semantic search failed:', err.message);
+    return { matches: [], bestMatch: null };
+  }
+}
+
 // --- Score Aggregation ---
 
-function aggregateScores(claudeResult, vtResult, keywordResult) {
+function aggregateScores(claudeResult, vtResult, keywordResult, semanticResult) {
   let riskScore;
   let confidence;
   let source;
 
   if (claudeResult) {
-    // Weighted average: Claude 60%, VT 25%, Keywords 15%
+    // Weighted average: Claude 60%, VT 25%, Keywords 10%, Semantic 5%
     const claudeScore = claudeResult.risk_score || 5;
     const vtScore = vtResult ? Math.min(10, (vtResult.malicious / Math.max(vtResult.total, 1)) * 20) : 0;
     const kwScore = keywordResult ? keywordResult.score : 0;
+    const semanticScore = semanticResult?.bestMatch ? semanticResult.bestMatch.severity : 0;
 
     if (vtResult) {
-      riskScore = Math.round(claudeScore * 0.6 + vtScore * 0.25 + kwScore * 0.15);
+      riskScore = Math.round(claudeScore * 0.6 + vtScore * 0.25 + kwScore * 0.1 + semanticScore * 0.05);
     } else {
-      riskScore = Math.round(claudeScore * 0.75 + kwScore * 0.25);
+      riskScore = Math.round(claudeScore * 0.7 + kwScore * 0.2 + semanticScore * 0.1);
     }
 
     confidence = claudeResult.confidence || 70;
@@ -248,34 +272,45 @@ async function analyzeContent(input) {
   // Stage 1: Parse input
   const parsed = parseInput(input);
 
-  // Stage 2 & 3: Run VT and keyword analysis in parallel
-  const [vtResult, keywordResult] = await Promise.all([
+  // Stage 2, 3, & 4: Run VT, keywords, and semantic search in parallel
+  const [vtResult, keywordResult, semanticResult] = await Promise.all([
     parsed.urls.length > 0 ? checkVirusTotal(parsed.urls[0]) : Promise.resolve(null),
     Promise.resolve(analyzeKeywords(parsed.text)),
+    findSemanticMatches(parsed.text),
   ]);
 
-  // Stage 4: Claude analysis
+  // Stage 5: Claude analysis
   const claudeResult = await analyzeWithClaude(input, vtResult, keywordResult);
 
-  // Stage 5: Aggregate scores
-  const { riskScore, confidence, source } = aggregateScores(claudeResult, vtResult, keywordResult);
+  // Stage 6: Aggregate scores (now includes semantic similarity)
+  const { riskScore, confidence, source } = aggregateScores(claudeResult, vtResult, keywordResult, semanticResult);
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+
+  // Combine all indicators
+  const allIndicators = [
+    ...(claudeResult?.indicators || []),
+    ...keywordResult.matches,
+    ...(semanticResult.matches.map((m) => `Similar to: "${m.pattern}" (${m.similarity}% match)`) || []),
+  ];
 
   return {
     riskScore,
     confidence,
-    indicators: claudeResult?.indicators || keywordResult.matches,
-    reasoning: claudeResult?.reasoning || (keywordResult.matches.length > 0
-      ? `Keyword analysis detected: ${keywordResult.matches.join(', ')}`
-      : 'No clear scam indicators detected.'),
+    indicators: [...new Set(allIndicators)],
+    reasoning: claudeResult?.reasoning || (semanticResult?.bestMatch
+      ? `Semantic match found: "${semanticResult.bestMatch.pattern}"`
+      : keywordResult.matches.length > 0
+        ? `Keyword analysis detected: ${keywordResult.matches.join(', ')}`
+        : 'No clear scam indicators detected.'),
     advice: claudeResult?.advice || 'Exercise caution with any unsolicited financial offers.',
     virusTotalResult: vtResult,
     keywordMatches: keywordResult.matches,
+    semanticMatches: semanticResult.matches,
     contentType: parsed.contentType,
     source,
     elapsed,
   };
 }
 
-module.exports = { analyzeContent, analyzeKeywords };
+module.exports = { analyzeContent, analyzeKeywords, findSemanticMatches };

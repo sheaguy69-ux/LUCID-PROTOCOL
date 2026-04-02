@@ -36,6 +36,7 @@ const registerStatus = require('./commands/status');
 const registerPremium = require('./commands/premium');
 const registerApiKey = require('./commands/apikey');
 const registerUsage = require('./commands/usage');
+const registerLearn = require('./commands/learn');
 
 registerHelp(bot);
 registerScan(bot);
@@ -44,6 +45,7 @@ registerStatus(bot);
 registerPremium(bot);
 registerApiKey(bot);
 registerUsage(bot);
+registerLearn(bot);
 
 // --- Start usage tracking batch flush ---
 
