@@ -1,6 +1,12 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const { parseInput, encodeUrlForVT, getDomain } = require('./utils/urlExtractor');
-const { generateEmbedding, findSimilarScams } = require('./embeddingEngine');
+const {
+  generateEmbedding,
+  generateMultimodalEmbedding,
+  findSimilarScams,
+  TASK_TYPES,
+} = require('./embeddingEngine');
+const { sanitizeInput } = require('./aegisAgent');
 
 let anthropic = null;
 
@@ -144,9 +150,9 @@ function analyzeKeywords(text) {
   return { score: Math.min(score, 10), matches };
 }
 
-// --- Claude Analysis ---
+// --- Claude Analysis (supports multimodal via vision) ---
 
-async function analyzeWithClaude(input, vtResult, keywordResult) {
+async function analyzeWithClaude(input, vtResult, keywordResult, mediaInfo = null) {
   try {
     const client = getAnthropic();
 
@@ -157,26 +163,42 @@ async function analyzeWithClaude(input, vtResult, keywordResult) {
     if (keywordResult && keywordResult.matches.length > 0) {
       contextParts.push(`Keyword matches: ${keywordResult.matches.join(', ')}`);
     }
+    if (mediaInfo) {
+      contextParts.push(`Media type: ${mediaInfo.type} (${mediaInfo.mimeType || 'unknown mime'})`);
+    }
 
     const contextStr = contextParts.length > 0
       ? `\n\nPre-analysis context:\n${contextParts.join('\n')}`
       : '';
 
+    // Build message content — multimodal if image attached
+    const contentParts = [];
+
+    if (mediaInfo && mediaInfo.type === 'image' && mediaInfo.data) {
+      contentParts.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: mediaInfo.data.mimeType,
+          data: mediaInfo.data.buffer.toString('base64'),
+        },
+      });
+    }
+
+    const textPrompt = `Analyze the following content for crypto, investment, or financial scam indicators. Consider phishing, Ponzi schemes, pump-and-dump, fake giveaways, impersonation, and social engineering tactics.${contextStr}
+
+${mediaInfo && mediaInfo.type === 'image' ? 'The image above was sent by a user for scam analysis. Look for fake screenshots, phishing pages, fake exchange interfaces, manipulated charts, fake celebrity endorsements, or scam promotional material.\n\n' : ''}Content to analyze:
+${input || '(no text — analyze the attached media)'}
+
+Return ONLY valid JSON with this exact structure:
+{"risk_score": <1-10>, "confidence": <0-100>, "indicators": ["<indicator1>", "<indicator2>"], "reasoning": "<brief explanation>", "advice": "<what the user should do>"}`;
+
+    contentParts.push({ type: 'text', text: textPrompt });
+
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: `Analyze the following content for crypto, investment, or financial scam indicators. Consider phishing, Ponzi schemes, pump-and-dump, fake giveaways, impersonation, and social engineering tactics.${contextStr}
-
-Content to analyze:
-${input}
-
-Return ONLY valid JSON with this exact structure:
-{"risk_score": <1-10>, "confidence": <0-100>, "indicators": ["<indicator1>", "<indicator2>"], "reasoning": "<brief explanation>", "advice": "<what the user should do>"}`,
-        },
-      ],
+      messages: [{ role: 'user', content: contentParts }],
     });
 
     const text = message.content[0]?.text || '';
@@ -190,12 +212,15 @@ Return ONLY valid JSON with this exact structure:
   }
 }
 
-// --- Semantic Similarity Search ---
+// --- Semantic Similarity Search (text) ---
 
 async function findSemanticMatches(input) {
   try {
-    const embedding = await generateEmbedding(input);
-    if (!embedding) return { matches: [], bestMatch: null };
+    // Use RETRIEVAL_QUERY task type — optimized for finding matches in the database
+    const embedding = await generateEmbedding(input, {
+      taskType: TASK_TYPES.RETRIEVAL_QUERY,
+    });
+    if (!embedding) return { matches: [], bestMatch: null, embedding: null };
 
     const matches = await findSimilarScams(embedding, 3);
     return {
@@ -205,10 +230,36 @@ async function findSemanticMatches(input) {
         severity: m.severity,
       })),
       bestMatch: matches[0] || null,
+      embedding,
     };
   } catch (err) {
     console.error('Semantic search failed:', err.message);
-    return { matches: [], bestMatch: null };
+    return { matches: [], bestMatch: null, embedding: null };
+  }
+}
+
+// --- Multimodal Semantic Search (images, audio, PDFs) ---
+
+async function findMultimodalMatches(mediaData, caption = '') {
+  try {
+    const embedding = await generateMultimodalEmbedding(mediaData, caption, {
+      taskType: TASK_TYPES.RETRIEVAL_QUERY,
+    });
+    if (!embedding) return { matches: [], bestMatch: null, embedding: null };
+
+    const matches = await findSimilarScams(embedding, 3);
+    return {
+      matches: matches.map((m) => ({
+        pattern: m.pattern,
+        similarity: Math.round(m.similarity * 100),
+        severity: m.severity,
+      })),
+      bestMatch: matches[0] || null,
+      embedding,
+    };
+  } catch (err) {
+    console.error('Multimodal semantic search failed:', err.message);
+    return { matches: [], bestMatch: null, embedding: null };
   }
 }
 
@@ -264,10 +315,13 @@ function aggregateScores(claudeResult, vtResult, keywordResult, semanticResult) 
   return { riskScore, confidence, source };
 }
 
-// --- Main Analysis Function ---
+// --- Main Analysis Function (text-only, backward compatible) ---
 
 async function analyzeContent(input) {
   const startTime = Date.now();
+
+  // Aegis: Strip zero-width / invisible Unicode before any analysis
+  input = sanitizeInput(input);
 
   // Stage 1: Parse input
   const parsed = parseInput(input);
@@ -313,4 +367,76 @@ async function analyzeContent(input) {
   };
 }
 
-module.exports = { analyzeContent, analyzeKeywords, findSemanticMatches };
+// --- Multimodal Analysis Function (photos, voice, documents) ---
+
+async function analyzeMultimodalContent(mediaData, caption = '') {
+  const startTime = Date.now();
+
+  // Aegis: Strip zero-width / invisible Unicode from caption
+  caption = sanitizeInput(caption) || '';
+
+  // Build media info for Claude
+  const mediaInfo = {
+    type: mediaData.mimeType.startsWith('image/') ? 'image'
+      : mediaData.mimeType.startsWith('audio/') ? 'audio'
+        : 'document',
+    mimeType: mediaData.mimeType,
+    data: mediaData,
+  };
+
+  // Parse caption for URLs and keywords
+  const parsed = caption ? parseInput(caption) : { text: '', urls: [], contentType: 'media' };
+
+  // Run all stages in parallel
+  const [vtResult, keywordResult, semanticResult] = await Promise.all([
+    // Check URLs from caption
+    parsed.urls.length > 0 ? checkVirusTotal(parsed.urls[0]) : Promise.resolve(null),
+    // Keywords from caption text
+    caption ? Promise.resolve(analyzeKeywords(caption)) : Promise.resolve({ score: 0, matches: [] }),
+    // Multimodal semantic search — embed the image/audio/doc itself
+    findMultimodalMatches(mediaData, caption),
+  ]);
+
+  // Claude vision analysis (send image + caption context)
+  const claudeResult = await analyzeWithClaude(
+    caption || '(user sent media for scam analysis)',
+    vtResult,
+    keywordResult,
+    mediaInfo
+  );
+
+  // Aggregate scores
+  const { riskScore, confidence, source } = aggregateScores(claudeResult, vtResult, keywordResult, semanticResult);
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+
+  // Combine all indicators
+  const allIndicators = [
+    ...(claudeResult?.indicators || []),
+    ...keywordResult.matches,
+    ...(semanticResult.matches.map((m) => `Similar to: "${m.pattern}" (${m.similarity}% match)`) || []),
+  ];
+
+  return {
+    riskScore,
+    confidence,
+    indicators: [...new Set(allIndicators)],
+    reasoning: claudeResult?.reasoning || 'Media analyzed for visual scam indicators.',
+    advice: claudeResult?.advice || 'Exercise caution with unsolicited media containing financial claims.',
+    virusTotalResult: vtResult,
+    keywordMatches: keywordResult.matches,
+    semanticMatches: semanticResult.matches,
+    contentType: `media_${mediaInfo.type}`,
+    mediaType: mediaInfo.type,
+    source,
+    elapsed,
+  };
+}
+
+module.exports = {
+  analyzeContent,
+  analyzeMultimodalContent,
+  analyzeKeywords,
+  findSemanticMatches,
+  findMultimodalMatches,
+};

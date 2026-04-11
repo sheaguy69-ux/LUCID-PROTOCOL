@@ -1,7 +1,5 @@
-const { formatPremium } = require('../utils/formatter');
-
 module.exports = function registerPremiumCommand(bot) {
   bot.onText(/\/premium(?:@\w+)?/, (msg) => {
-    bot.sendMessage(msg.chat.id, formatPremium(), { parse_mode: 'MarkdownV2' });
+    bot.sendMessage(msg.chat.id, 'Use /upgrade to see pricing and start your free trial.');
   });
 };

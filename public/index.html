@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScamShield — AI-Powered Scam Detection</title>
+  <meta name="description" content="Protect yourself from crypto scams, rug pulls, and wallet drainers. AI-powered detection with Aegis multi-agent oversight.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #0a0a1a;
+      --bg-card: #12122a;
+      --purple-main: #7c3aed;
+      --purple-light: #a78bfa;
+      --purple-glow: rgba(124, 58, 237, 0.4);
+      --text-primary: #f0f0ff;
+      --text-secondary: #9ca3af;
+      --border: rgba(124, 58, 237, 0.2);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* --- Animated Background Grid --- */
+    .bg-grid {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image:
+        linear-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      z-index: 0;
+      animation: gridPulse 8s ease-in-out infinite;
+    }
+
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+    }
+
+    /* --- Main Container --- */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* --- Nav --- */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0;
+    }
+
+    nav .brand {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--purple-light);
+      letter-spacing: 0.5px;
+    }
+
+    nav .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      margin-left: 28px;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    nav .nav-links a:hover { color: var(--text-primary); }
+
+    /* --- Hero --- */
+    .hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+
+    /* --- Logo with Motion Graphic --- */
+    .logo-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 32px;
+    }
+
+    .logo-glow {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--purple-glow) 0%, transparent 70%);
+      animation: glowPulse 3s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    .logo-shield-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      border: 2px solid rgba(124, 58, 237, 0.15);
+      border-radius: 50%;
+      animation: ringRotate 12s linear infinite;
+      z-index: 0;
+    }
+
+    .logo-shield-ring::before {
+      content: '';
+      position: absolute;
+      top: -4px; left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 8px;
+      background: var(--purple-main);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--purple-glow);
+    }
+
+    .logo-shield-ring-2 {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 240px;
+      height: 240px;
+      border: 1px solid rgba(124, 58, 237, 0.08);
+      border-radius: 50%;
+      animation: ringRotate 20s linear infinite reverse;
+      z-index: 0;
+    }
+
+    .logo-shield-ring-2::before {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 6px;
+      background: var(--purple-light);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--purple-glow);
+    }
+
+    .logo-img {
+      position: relative;
+      z-index: 1;
+      width: 160px;
+      height: 160px;
+      border-radius: 20px;
+      animation: logoFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+    }
+
+    @keyframes ringRotate {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* --- Hero Text --- */
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 .accent { color: var(--purple-light); }
+
+    .hero .tagline {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 540px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+
+    /* --- CTA Buttons --- */
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--purple-main);
+      color: white;
+      box-shadow: 0 4px 20px var(--purple-glow);
+    }
+
+    .btn-primary:hover {
+      background: #6d28d9;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px var(--purple-glow);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--purple-light);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(124, 58, 237, 0.08);
+      border-color: var(--purple-main);
+    }
+
+    /* --- Threat Types --- */
+    .threats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 48px;
+      flex-wrap: wrap;
+    }
+
+    .threat-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .threat-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: dotBlink 2s ease-in-out infinite;
+    }
+
+    @keyframes dotBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* --- Features --- */
+    .features {
+      padding: 80px 0;
+    }
+
+    .features h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .features .subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+      font-size: 1rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--purple-main);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 14px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* --- Aegis Section --- */
+    .aegis {
+      padding: 60px 0;
+      text-align: center;
+    }
+
+    .aegis-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(124, 58, 237, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      color: var(--purple-light);
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .aegis h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .aegis .subtitle {
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    .aegis-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .flow-step {
+      padding: 12px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .flow-step.aegis-step {
+      border-color: var(--purple-main);
+      background: rgba(124, 58, 237, 0.1);
+      color: var(--purple-light);
+    }
+
+    .flow-arrow {
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+    }
+
+    /* --- Pricing --- */
+    .pricing {
+      padding: 80px 0;
+    }
+
+    .pricing h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .pricing .subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .price-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .price-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .price-card.featured {
+      border-color: var(--purple-main);
+      box-shadow: 0 0 30px rgba(124, 58, 237, 0.15);
+    }
+
+    .price-card .tier {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .price-card .price {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .price-card .period {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .price-card ul {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .price-card li {
+      padding: 6px 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .price-card li::before {
+      content: "\2713";
+      color: var(--purple-light);
+      margin-right: 8px;
+      font-weight: 700;
+    }
+
+    /* --- Footer --- */
+    footer {
+      padding: 40px 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+
+    footer p {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--purple-light);
+      text-decoration: none;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 2rem; }
+      .threats { gap: 12px; }
+      .flow-arrow { display: none; }
+      .aegis-flow { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <div class="container">
+    <!-- Nav -->
+    <nav>
+      <div class="brand">ScamShield</div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#aegis">Aegis</a>
+        <a href="#pricing">Pricing</a>
+        <a href="/api/scan" target="_blank">API</a>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="logo-wrapper">
+        <div class="logo-glow"></div>
+        <div class="logo-shield-ring"></div>
+        <div class="logo-shield-ring-2"></div>
+        <img src="/logo.png" alt="ScamShield Logo" class="logo-img">
+      </div>
+
+      <h1>Stop Scams Before<br>They <span class="accent">Strike</span></h1>
+      <p class="tagline">
+        AI-powered detection for crypto scams, rug pulls, and wallet drainers.
+        Protected by Aegis multi-agent oversight.
+      </p>
+
+      <div class="cta-group">
+        <a href="https://t.me/YourBotUsername" class="btn btn-primary">
+          Open in Telegram
+        </a>
+        <a href="#pricing" class="btn btn-secondary">
+          View API Pricing
+        </a>
+      </div>
+
+      <div class="threats">
+        <div class="threat-badge"><span class="dot"></span> Rug Pulls</div>
+        <div class="threat-badge"><span class="dot"></span> Wallet Drainers</div>
+        <div class="threat-badge"><span class="dot"></span> Scam Coins</div>
+        <div class="threat-badge"><span class="dot"></span> Phishing</div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+      <h2>How ScamShield Protects You</h2>
+      <p class="subtitle">6-stage AI analysis pipeline — every scan passes through multiple detection layers</p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>Claude AI Analysis</h3>
+          <p>Advanced AI evaluates social engineering tactics, phishing patterns, and red flags in text and images.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔗</div>
+          <h3>VirusTotal Integration</h3>
+          <p>Every URL is checked against 90+ security vendors in real-time for known threats.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧠</div>
+          <h3>Semantic Memory</h3>
+          <p>Community-taught scam patterns stored as embeddings. The more we learn, the smarter we get.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📸</div>
+          <h3>Media Scanning</h3>
+          <p>Send photos, voice messages, audio, or PDFs. Multimodal AI detects scams in any format.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡</div>
+          <h3>Aegis Oversight</h3>
+          <p>A hidden secondary AI silently reviews every decision — blocking false positives and catching what others miss.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Instant Results</h3>
+          <p>Risk score from 1-10 with detailed reasoning, indicators, and actionable advice in seconds.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Aegis -->
+    <section class="aegis" id="aegis">
+      <div class="aegis-badge">Multi-Agent Security</div>
+      <h2>Powered by Aegis</h2>
+      <p class="subtitle">
+        A silent guardian agent watches every scan in real-time.
+        If the primary AI is tricked or uncertain, Aegis steps in — blocking harmful results before they reach you.
+      </p>
+
+      <div class="aegis-flow">
+        <div class="flow-step">Your Message</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">AI Analysis</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step aegis-step">Aegis Review</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">Safe Result</div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+      <h2>Simple Pricing</h2>
+      <p class="subtitle">Start with a 7-day free trial. Cancel anytime.</p>
+
+      <div class="pricing-grid">
+        <div class="price-card featured">
+          <div class="tier">Pro</div>
+          <div class="price">$8</div>
+          <div class="period">/month</div>
+          <ul>
+            <li>1,000 scans/month</li>
+            <li>Full Aegis oversight</li>
+            <li>Transparent block/flag alerts</li>
+            <li>API access</li>
+            <li>Priority support</li>
+          </ul>
+          <a href="https://t.me/YourBotUsername" class="btn btn-primary" style="width:100%;justify-content:center;">Start Free Trial</a>
+        </div>
+        <div class="price-card">
+          <div class="tier">Unlimited</div>
+          <div class="price">$17</div>
+          <div class="period">/month</div>
+          <ul>
+            <li>Unlimited scans</li>
+            <li>Everything in Pro</li>
+            <li>Admin dashboard + audit logs</li>
+            <li>Custom Aegis policies</li>
+          </ul>
+          <a href="https://t.me/YourBotUsername" class="btn btn-primary" style="width:100%;justify-content:center;">Start Free Trial</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>ScamShield &mdash; built by <a href="#">BUTTA / Gateway Visions</a></p>
+    </footer>
+  </div>
+</body>
+</html>

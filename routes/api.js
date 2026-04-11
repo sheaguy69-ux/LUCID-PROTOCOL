@@ -2,7 +2,8 @@ const express = require('express');
 const { validateApiKey } = require('../apiKeySystem');
 const { analyzeContent } = require('../scamDetector');
 const { logScan } = require('../usageTracking');
-const { incrementUsage, getUsageSummary, FREE_TIER_SCANS } = require('../metering');
+const { incrementUsage, getUsageSummary, checkScanAllowance, TIER_LIMITS } = require('../metering');
+const { checkRateLimit, reviewScanResult, AEGIS_STATUS } = require('../aegisAgent');
 
 const router = express.Router();
 
@@ -51,7 +52,26 @@ router.post('/scan', authenticateApiKey, async (req, res) => {
 
   const startTime = Date.now();
 
+  // Aegis: per-key rate limiting
+  const rateCheck = checkRateLimit(req.apiKey);
+  if (rateCheck.status === AEGIS_STATUS.BLOCKED) {
+    return res.status(429).json({
+      error: rateCheck.violations[0]?.message || 'Rate limit exceeded.',
+      aegis: { status: rateCheck.status, rule: rateCheck.violations[0]?.rule },
+    });
+  }
+
   try {
+    // Check subscription tier before allowing scan
+    const tierCheck = await checkScanAllowance(req.apiKey.telegram_user_id);
+    if (!tierCheck.allowed) {
+      const status = tierCheck.reason === 'no_subscription' ? 402 : 429;
+      return res.status(status).json({
+        error: tierCheck.reason === 'no_subscription' ? 'subscription_required' : 'scan_limit_exceeded',
+        ...(tierCheck.limit && { used: tierCheck.used, limit: tierCheck.limit }),
+      });
+    }
+
     // Increment usage and get current counts
     const usage = await incrementUsage(req.apiKey.id);
     const summary = await getUsageSummary(req.apiKey.id);
@@ -59,6 +79,9 @@ router.post('/scan', authenticateApiKey, async (req, res) => {
     // Run the scan
     const result = await analyzeContent(content);
     const responseTimeMs = Date.now() - startTime;
+
+    // Aegis: review the scan result
+    const aegis = await reviewScanResult(result, { input: content });
 
     // Log scan to batch buffer
     logScan({
@@ -69,14 +92,26 @@ router.post('/scan', authenticateApiKey, async (req, res) => {
     });
 
     // Set usage headers
+    const limit = TIER_LIMITS[tierCheck.tier] || 0;
+    const remaining = limit === Infinity ? 'unlimited' : String(Math.max(0, limit - (tierCheck.used || 0)));
     res.set('X-Scans-Used', String(summary.scanCount));
-    res.set('X-Scans-Remaining', String(summary.freeRemaining));
-    res.set('X-Billing-Status', summary.billingStatus);
+    res.set('X-Scans-Remaining', remaining);
+    res.set('X-Subscription-Tier', tierCheck.tier);
 
     // Test keys get flagged
     if (req.apiKey.is_test) {
       res.set('X-Test-Mode', 'true');
     }
+
+    // Build Aegis section for API response
+    const aegisSection = {
+      status: aegis.status,
+      violations: aegis.violations.map((v) => ({
+        rule: v.rule,
+        severity: v.severity,
+        message: v.message,
+      })),
+    };
 
     res.json({
       success: true,
@@ -96,12 +131,13 @@ router.post('/scan', authenticateApiKey, async (req, res) => {
           : null,
         analysis_source: result.source,
         response_time_ms: responseTimeMs,
+        aegis: aegisSection,
       },
       usage: {
         scans_used: summary.scanCount,
-        scans_remaining: summary.freeRemaining,
-        overage_cost: summary.overageCost,
-        billing_status: summary.billingStatus,
+        tier: tierCheck.tier,
+        tier_limit: limit === Infinity ? 'unlimited' : limit,
+        scans_remaining: remaining,
       },
     });
   } catch (err) {
@@ -115,21 +151,23 @@ router.post('/scan', authenticateApiKey, async (req, res) => {
 router.get('/usage', authenticateApiKey, async (req, res) => {
   try {
     const summary = await getUsageSummary(req.apiKey.id);
+    const tierCheck = await checkScanAllowance(req.apiKey.telegram_user_id);
+    const limit = TIER_LIMITS[tierCheck.tier] || 0;
+    const remaining = limit === Infinity ? 'unlimited' : String(Math.max(0, limit - (tierCheck.used || 0)));
 
     res.set('X-Scans-Used', String(summary.scanCount));
-    res.set('X-Scans-Remaining', String(summary.freeRemaining));
-    res.set('X-Billing-Status', summary.billingStatus);
+    res.set('X-Scans-Remaining', remaining);
+    res.set('X-Subscription-Tier', tierCheck.tier);
 
     res.json({
       success: true,
       data: {
         month: summary.month,
         scans_used: summary.scanCount,
-        free_tier_limit: FREE_TIER_SCANS,
-        scans_remaining: summary.freeRemaining,
-        overage_scans: summary.overageCount,
-        overage_cost: summary.overageCost,
-        billing_status: summary.billingStatus,
+        tier: tierCheck.tier,
+        tier_status: tierCheck.status,
+        tier_limit: limit === Infinity ? 'unlimited' : limit,
+        scans_remaining: remaining,
       },
     });
   } catch (err) {

@@ -90,6 +90,57 @@ function formatStatus(stats, uptimeSeconds) {
   ].join('\n');
 }
 
+function formatMultimodalScanResult(result, mediaType) {
+  const e = escapeMarkdownV2;
+
+  const mediaLabel = {
+    image: '📸 Image',
+    audio: '🎤 Voice/Audio',
+    document: '📄 Document',
+  }[mediaType] || '📎 Media';
+
+  const indicators = (result.indicators || [])
+    .map((ind) => `  • ${e(ind)}`)
+    .join('\n');
+
+  const lines = [
+    `*🛡 ScamShield Media Analysis*`,
+    ``,
+    `*Type:* ${e(mediaLabel)}`,
+    `*Risk Score:* ${e(riskBar(result.riskScore))}`,
+    `*Confidence:* ${e(result.confidence + '%')}`,
+  ];
+
+  if (result.semanticMatches && result.semanticMatches.length > 0) {
+    lines.push('', `*🧠 Similar Known Scams:*`);
+    result.semanticMatches.forEach((m) => {
+      lines.push(`  • ${e(`"${m.pattern}" — ${m.similarity}% match`)}`);
+    });
+  }
+
+  if (indicators) {
+    lines.push('', `*Red Flags Found:*`, indicators);
+  }
+
+  if (result.reasoning) {
+    lines.push('', `*Reasoning:*`, e(result.reasoning));
+  }
+
+  if (result.advice) {
+    lines.push('', `*Advice:*`, e(result.advice));
+  }
+
+  if (result.virusTotalResult) {
+    const vt = result.virusTotalResult;
+    lines.push('', `*VirusTotal:* ${e(`${vt.malicious}/${vt.total} engines flagged`)}`);
+  }
+
+  const elapsed = result.elapsed ? `${e(result.elapsed)}` : '';
+  lines.push('', `_${elapsed ? `Scanned in ${elapsed}s` : 'Scan complete'}_`);
+
+  return lines.join('\n');
+}
+
 function formatHelp() {
   return [
     `*🛡 ScamShield Bot*`,
@@ -99,14 +150,15 @@ function formatHelp() {
     `*Commands:*`,
     `/scan \\[text or URL\\] — Analyze for scam indicators`,
     `/report \\[description\\] — Submit a suspected scam`,
+    `/upgrade — Subscribe or upgrade your plan`,
+    `/manage — Manage billing \\& subscription`,
     `/apikey — Generate an API key for developers`,
-    `/usage — View your API usage \\& billing`,
+    `/usage — View your usage \\& subscription`,
     `/status — Bot status \\& statistics`,
-    `/premium — Upgrade to premium`,
     `/help — Show this message`,
     ``,
     `*How it works:*`,
-    `Send any suspicious message, link, or offer and ScamShield will analyze it using AI, URL reputation databases, and pattern matching to give you a risk score from 1\\-10\\.`,
+    `Send any suspicious message, link, offer, screenshot, or voice note and ScamShield will analyze it using AI, URL reputation scanning, and pattern matching to give you a risk score from 1\\-10\\.`,
     ``,
     `_Stay safe out there\\! 🛡_`,
   ].join('\n');
@@ -114,24 +166,23 @@ function formatHelp() {
 
 function formatPremium() {
   return [
-    `*⭐ ScamShield API Pricing*`,
+    `*⭐ ScamShield Pricing*`,
     ``,
-    `*Free Tier*`,
-    `• 100 API scans/month`,
-    `• Full analysis pipeline`,
-    `• Usage tracking dashboard`,
-    `• $0\\.05/scan overage after 100`,
+    `*Pro — $8/mo*`,
+    `• 1,000 scans/month`,
+    `• Full Aegis multi\\-agent oversight`,
+    `• Transparent block/flag explanations`,
+    `• API access \\+ priority support`,
+    `• 7\\-day free trial`,
     ``,
-    `*Unlimited — $28/mo*`,
-    `• Unlimited API scans`,
-    `• Priority analysis — faster response times`,
-    `• Bulk scanning — multiple URLs per request`,
-    `• Detailed reports with full source breakdown`,
-    `• No overage charges ever`,
+    `*Unlimited — $17/mo*`,
+    `• Unlimited scans`,
+    `• Everything in Pro`,
+    `• Admin dashboard \\+ audit logs`,
+    `• Custom Aegis policies`,
+    `• 7\\-day free trial`,
     ``,
-    `Telegram bot scanning is always free\\.`,
-    ``,
-    `_Use /apikey to get started with the free tier\\._`,
+    `_Type /upgrade to start your free trial\\._`,
   ].join('\n');
 }
 
@@ -139,6 +190,7 @@ module.exports = {
   escapeMarkdownV2,
   riskBar,
   formatScanResult,
+  formatMultimodalScanResult,
   formatReportConfirmation,
   formatStatus,
   formatHelp,

@@ -1,6 +1,7 @@
 const { insertSignature } = require('../database');
 const { generateEmbedding, storeEmbedding } = require('../embeddingEngine');
 const { escapeMarkdownV2 } = require('../utils/formatter');
+const { reviewPattern, AEGIS_STATUS } = require('../aegisAgent');
 
 module.exports = function registerLearnCommand(bot) {
   bot.onText(/\/learn(?:@\w+)?\s+severity:(\d+)\s+(.+)/s, async (msg, match) => {
@@ -24,6 +25,14 @@ module.exports = function registerLearnCommand(bot) {
     bot.sendChatAction(chatId, 'typing');
 
     try {
+      // Aegis: review pattern before storing
+      const aegis = await reviewPattern(pattern, severity, { userId });
+
+      if (aegis.status === AEGIS_STATUS.BLOCKED) {
+        const reason = aegis.violations[0]?.message || 'Pattern rejected by policy.';
+        return bot.sendMessage(chatId, `🛡 *Aegis blocked this pattern*\n\n${escapeMarkdownV2(reason)}`, { parse_mode: 'MarkdownV2' });
+      }
+
       // Generate embedding for the new pattern
       const embedding = await generateEmbedding(pattern);
 
@@ -45,13 +54,17 @@ module.exports = function registerLearnCommand(bot) {
       }
 
       const e = escapeMarkdownV2;
+      const aegisNote = aegis.status === AEGIS_STATUS.FLAGGED
+        ? `\n⚠️ _${e(aegis.violations[0]?.message || 'Under review')}_\n`
+        : '';
+
       const lines = [
         `*✅ Pattern Added to Knowledge Base*`,
         ``,
         `Pattern: ${e(pattern)}`,
         `Severity: ${e(String(severity))}/10`,
         `Embedded: ${embedding ? 'Yes' : 'No \\(will use keyword matching\\)'}`,
-        ``,
+        aegisNote,
         `This pattern will now be detected in future scans via semantic similarity\\!`,
       ];
 

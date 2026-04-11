@@ -5,7 +5,7 @@ const express = require('express');
 
 // --- Validate required env vars ---
 
-const REQUIRED_VARS = ['TELEGRAM_BOT_TOKEN', 'ANTHROPIC_API_KEY', 'SUPABASE_URL', 'SUPABASE_KEY'];
+const REQUIRED_VARS = ['TELEGRAM_BOT_TOKEN', 'ANTHROPIC_API_KEY', 'SUPABASE_URL', 'SUPABASE_KEY', 'STRIPE_SECRET_KEY'];
 const missing = REQUIRED_VARS.filter((v) => !process.env[v]);
 if (missing.length > 0) {
   console.error(`Missing required environment variables: ${missing.join(', ')}`);
@@ -37,6 +37,9 @@ const registerPremium = require('./commands/premium');
 const registerApiKey = require('./commands/apikey');
 const registerUsage = require('./commands/usage');
 const registerLearn = require('./commands/learn');
+const registerMediaScan = require('./commands/mediaScan');
+const registerUpgrade = require('./commands/upgrade');
+const registerManage = require('./commands/manage');
 
 registerHelp(bot);
 registerScan(bot);
@@ -46,6 +49,14 @@ registerPremium(bot);
 registerApiKey(bot);
 registerUsage(bot);
 registerLearn(bot);
+registerMediaScan(bot);
+registerUpgrade(bot);
+registerManage(bot);
+
+// --- Initialize Aegis multi-agent oversight ---
+
+const aegis = require('./aegisAgent');
+aegis.init();
 
 // --- Start usage tracking batch flush ---
 
@@ -54,25 +65,18 @@ startBatchFlush();
 
 // --- Express server (webhook mode + health check) ---
 
+const path = require('path');
 const app = express();
 const apiRouter = require('./routes/api');
 
-app.use('/api', apiRouter);
+// Serve static files (landing page, logo, etc.)
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => {
-  res.json({
-    name: 'ScamShield Bot',
-    description: 'AI-powered scam detection for crypto & investment fraud',
-    status: 'online',
-    endpoints: {
-      'POST /api/scan': 'Analyze content for scam indicators (API key required)',
-      'GET /api/usage': 'Check your API usage and billing (API key required)',
-      'GET /health': 'Service health check',
-    },
-    telegram: 'Search @YourBotUsername on Telegram to use for free',
-    docs: 'Pass Authorization: Bearer <your_api_key> header to authenticate',
-  });
-});
+// Stripe webhook — must be mounted with raw body BEFORE any express.json() middleware
+const createWebhookRouter = require('./routes/webhook');
+app.use('/webhooks/stripe', express.raw({ type: 'application/json' }), createWebhookRouter(bot));
+
+app.use('/api', apiRouter);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', mode: BOT_MODE, uptime: process.uptime() });
@@ -117,6 +121,7 @@ process.on('unhandledRejection', (err) => {
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received, shutting down...');
   await flushBuffer();
+  aegis.shutdown();
   bot.stopPolling();
   process.exit(0);
 });
