@@ -129,6 +129,20 @@ router.post('/scan', authenticateApiKey, async (req, res) => {
               total: result.virusTotalResult.total,
             }
           : null,
+        blockchain: result.blockchainResult
+          ? {
+              addresses_found: result.blockchainResult.addresses.length,
+              honeypot_detected: result.blockchainResult.honeypotDetected,
+              malicious_wallet_detected: result.blockchainResult.maliciousWalletDetected,
+              highest_risk: result.blockchainResult.highestRisk,
+              results: result.blockchainResult.results.map((r) => ({
+                address: r.address,
+                chain: r.chainName,
+                risk_level: r.riskLevel,
+                flags: r.flags,
+              })),
+            }
+          : null,
         analysis_source: result.source,
         response_time_ms: responseTimeMs,
         aegis: aegisSection,

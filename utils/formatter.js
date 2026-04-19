@@ -44,9 +44,110 @@ function formatScanResult(result) {
     lines.push('', `*VirusTotal:* ${e(`${vt.malicious}/${vt.total} engines flagged`)}`);
   }
 
+  const blockchainSection = formatBlockchainSection(result.blockchainResult);
+  if (blockchainSection) {
+    lines.push('', `*On\\-Chain:*`, blockchainSection);
+  }
+
   const elapsed = result.elapsed ? `${e(result.elapsed)}` : '';
   lines.push('', `_${elapsed ? `Scanned in ${elapsed}s` : 'Scan complete'}_`);
 
+  return lines.join('\n');
+}
+
+const RISK_EMOJI = { critical: '💀', high: '🔴', low: '⚠️', none: '' };
+
+const FLAG_LABELS = {
+  isHoneypot: 'Honeypot',
+  isMaliciousContract: 'Malicious contract',
+  isSanctioned: 'Sanctioned',
+  isPhishing: 'Phishing activity',
+  isStealingAttack: 'Stealing attack',
+  hasHiddenOwner: 'Hidden owner',
+  hasSelfDestruct: 'Self-destruct',
+  isMaliciousWallet: 'Malicious wallet',
+};
+
+// Priority order for flag display (most severe first)
+const FLAG_ORDER = [
+  'isHoneypot', 'isMaliciousContract', 'isSanctioned',
+  'isPhishing', 'isStealingAttack', 'hasHiddenOwner',
+  'hasSelfDestruct', 'isMaliciousWallet',
+];
+
+function formatBlockchainSection(blockchainResult) {
+  if (!blockchainResult) return '';
+  const e = escapeMarkdownV2;
+  const lines = [];
+
+  for (const r of blockchainResult.results) {
+    if (r.riskLevel === 'none') continue;
+
+    const emoji = RISK_EMOJI[r.riskLevel] || '';
+    const shortAddr = `${r.address.slice(0, 6)}…${r.address.slice(-4)}`;
+    const activeFlags = FLAG_ORDER.filter((k) => r.flags[k]).slice(0, 3);
+    const flagStr = activeFlags.map((k) => FLAG_LABELS[k]).join(', ');
+
+    lines.push(`  • ${e(`${shortAddr} (${r.chainName})`)} ${emoji} ${e(flagStr)}`);
+
+    const sellTax = parseFloat(r.tokenSecurity?.sell_tax || '0');
+    const buyTax = parseFloat(r.tokenSecurity?.buy_tax || '0');
+    if (sellTax > 0 || buyTax > 0) {
+      lines.push(`    _Buy tax: ${e(String(buyTax))}% \\| Sell tax: ${e(String(sellTax))}%_`);
+    }
+  }
+
+  return lines.join('\n');
+}
+
+function formatContractResult(blockchainResult, claudeResult = null) {
+  const e = escapeMarkdownV2;
+
+  if (!blockchainResult || blockchainResult.results.length === 0) {
+    return '*🔍 On\\-Chain Scan*\n\nNo contract data found for this address\\.';
+  }
+
+  const lines = [`*🔍 On\\-Chain Analysis*`, ``];
+
+  for (const r of blockchainResult.results) {
+    const emoji = RISK_EMOJI[r.riskLevel] || '✅';
+    const ts = r.tokenSecurity;
+    const as = r.addressSecurity;
+
+    lines.push(`*Address:* \`${e(r.address)}\``);
+    lines.push(`*Chain:* ${e(r.chainName)}`);
+    lines.push(`*Status:* ${emoji} ${e(r.riskLevel.toUpperCase())}`);
+
+    if (ts?.token_name || ts?.token_symbol) {
+      lines.push(`*Token:* ${e(`${ts.token_name || ''} (${ts.token_symbol || '?'})`)}`);
+    }
+    if (ts?.holder_count) {
+      lines.push(`*Holders:* ${e(String(ts.holder_count))}`);
+    }
+
+    const activeFlags = FLAG_ORDER.filter((k) => r.flags[k]);
+    if (activeFlags.length > 0) {
+      lines.push(``, `*Red Flags:*`);
+      activeFlags.forEach((k) => lines.push(`  • ${e(FLAG_LABELS[k])}`));
+    }
+
+    const sellTax = parseFloat(ts?.sell_tax || '0');
+    const buyTax = parseFloat(ts?.buy_tax || '0');
+    if (sellTax > 0 || buyTax > 0) {
+      lines.push(``, `*Taxes:* Buy ${e(String(buyTax))}% \\| Sell ${e(String(sellTax))}%`);
+    }
+
+    lines.push(``);
+  }
+
+  if (claudeResult?.reasoning) {
+    lines.push(`*AI Reasoning:*`, e(claudeResult.reasoning), ``);
+  }
+  if (claudeResult?.advice) {
+    lines.push(`*Advice:*`, e(claudeResult.advice), ``);
+  }
+
+  lines.push(`_Powered by GoPlus Security_`);
   return lines.join('\n');
 }
 
@@ -135,6 +236,11 @@ function formatMultimodalScanResult(result, mediaType) {
     lines.push('', `*VirusTotal:* ${e(`${vt.malicious}/${vt.total} engines flagged`)}`);
   }
 
+  const blockchainSection = formatBlockchainSection(result.blockchainResult);
+  if (blockchainSection) {
+    lines.push('', `*On\\-Chain:*`, blockchainSection);
+  }
+
   const elapsed = result.elapsed ? `${e(result.elapsed)}` : '';
   lines.push('', `_${elapsed ? `Scanned in ${elapsed}s` : 'Scan complete'}_`);
 
@@ -149,6 +255,7 @@ function formatHelp() {
     ``,
     `*Commands:*`,
     `/scan \\[text or URL\\] — Analyze for scam indicators`,
+    `/contract \\[address\\] — Scan a contract or wallet on\\-chain`,
     `/report \\[description\\] — Submit a suspected scam`,
     `/upgrade — Subscribe or upgrade your plan`,
     `/manage — Manage billing \\& subscription`,
@@ -195,4 +302,6 @@ module.exports = {
   formatStatus,
   formatHelp,
   formatPremium,
+  formatBlockchainSection,
+  formatContractResult,
 };

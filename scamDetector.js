@@ -7,6 +7,8 @@ const {
   TASK_TYPES,
 } = require('./embeddingEngine');
 const { sanitizeInput } = require('./aegisAgent');
+const { scanWeb3Addresses } = require('./web3Scanner');
+const { fireIntercept } = require('./intelClient');
 
 let anthropic = null;
 
@@ -152,7 +154,7 @@ function analyzeKeywords(text) {
 
 // --- Claude Analysis (supports multimodal via vision) ---
 
-async function analyzeWithClaude(input, vtResult, keywordResult, mediaInfo = null) {
+async function analyzeWithClaude(input, vtResult, keywordResult, mediaInfo = null, blockchainResult = null) {
   try {
     const client = getAnthropic();
 
@@ -165,6 +167,12 @@ async function analyzeWithClaude(input, vtResult, keywordResult, mediaInfo = nul
     }
     if (mediaInfo) {
       contextParts.push(`Media type: ${mediaInfo.type} (${mediaInfo.mimeType || 'unknown mime'})`);
+    }
+    if (blockchainResult?.honeypotDetected) {
+      contextParts.push('Blockchain: HONEYPOT contract detected by GoPlus Security');
+    }
+    if (blockchainResult?.maliciousWalletDetected) {
+      contextParts.push('Blockchain: Malicious wallet flagged by GoPlus Security');
     }
 
     const contextStr = contextParts.length > 0
@@ -265,7 +273,7 @@ async function findMultimodalMatches(mediaData, caption = '') {
 
 // --- Score Aggregation ---
 
-function aggregateScores(claudeResult, vtResult, keywordResult, semanticResult) {
+function aggregateScores(claudeResult, vtResult, keywordResult, semanticResult, blockchainResult = null) {
   let riskScore;
   let confidence;
   let source;
@@ -308,6 +316,10 @@ function aggregateScores(claudeResult, vtResult, keywordResult, semanticResult) 
     riskScore = 7;
   }
 
+  // Blockchain floors
+  if (blockchainResult?.honeypotDetected && riskScore < 9) riskScore = 9;
+  if (blockchainResult?.maliciousWalletDetected && riskScore < 8) riskScore = 8;
+
   // Clamp
   riskScore = Math.max(1, Math.min(10, riskScore));
   confidence = Math.max(0, Math.min(100, confidence));
@@ -317,7 +329,9 @@ function aggregateScores(claudeResult, vtResult, keywordResult, semanticResult) 
 
 // --- Main Analysis Function (text-only, backward compatible) ---
 
-async function analyzeContent(input) {
+// opts: { userId?, sourceProduct? } — used for threat-intel harvest.
+// Defaults keep existing Telegram callers working unchanged.
+async function analyzeContent(input, opts = {}) {
   const startTime = Date.now();
 
   // Aegis: Strip zero-width / invisible Unicode before any analysis
@@ -326,18 +340,32 @@ async function analyzeContent(input) {
   // Stage 1: Parse input
   const parsed = parseInput(input);
 
-  // Stage 2, 3, & 4: Run VT, keywords, and semantic search in parallel
-  const [vtResult, keywordResult, semanticResult] = await Promise.all([
+  // Stage 2, 3, 4 & 5: Run VT, keywords, semantic search, and blockchain scan in parallel
+  const [vtResult, keywordResult, semanticResult, blockchainResult] = await Promise.all([
     parsed.urls.length > 0 ? checkVirusTotal(parsed.urls[0]) : Promise.resolve(null),
     Promise.resolve(analyzeKeywords(parsed.text)),
     findSemanticMatches(parsed.text),
+    scanWeb3Addresses(parsed.text),
   ]);
 
-  // Stage 5: Claude analysis
-  const claudeResult = await analyzeWithClaude(input, vtResult, keywordResult);
+  // Stage 6: Claude analysis
+  const claudeResult = await analyzeWithClaude(input, vtResult, keywordResult, null, blockchainResult);
 
-  // Stage 6: Aggregate scores (now includes semantic similarity)
-  const { riskScore, confidence, source } = aggregateScores(claudeResult, vtResult, keywordResult, semanticResult);
+  // Stage 7: Aggregate scores
+  const { riskScore, confidence, source } = aggregateScores(claudeResult, vtResult, keywordResult, semanticResult, blockchainResult);
+
+  // Stage 8: Harvest intercept (fire-and-forget, gated by intelClient threshold)
+  // Only contracts from blockchainResult are relevant if present.
+  const contracts = blockchainResult?.addresses || [];
+  fireIntercept({
+    rawText: input,
+    urls: parsed.urls || [],
+    contracts,
+    risk: riskScore,
+    sourceProduct: opts.sourceProduct || 'scamshield_tg',
+    userId: opts.userId,
+    mediaType: parsed.urls.length > 0 ? 'url' : 'text',
+  }).catch(() => { /* swallow — never block user */ });
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
@@ -361,6 +389,7 @@ async function analyzeContent(input) {
     virusTotalResult: vtResult,
     keywordMatches: keywordResult.matches,
     semanticMatches: semanticResult.matches,
+    blockchainResult,
     contentType: parsed.contentType,
     source,
     elapsed,
@@ -369,7 +398,8 @@ async function analyzeContent(input) {
 
 // --- Multimodal Analysis Function (photos, voice, documents) ---
 
-async function analyzeMultimodalContent(mediaData, caption = '') {
+// opts: { userId?, sourceProduct? } — used for threat-intel harvest.
+async function analyzeMultimodalContent(mediaData, caption = '', opts = {}) {
   const startTime = Date.now();
 
   // Aegis: Strip zero-width / invisible Unicode from caption
@@ -388,13 +418,15 @@ async function analyzeMultimodalContent(mediaData, caption = '') {
   const parsed = caption ? parseInput(caption) : { text: '', urls: [], contentType: 'media' };
 
   // Run all stages in parallel
-  const [vtResult, keywordResult, semanticResult] = await Promise.all([
+  const [vtResult, keywordResult, semanticResult, blockchainResult] = await Promise.all([
     // Check URLs from caption
     parsed.urls.length > 0 ? checkVirusTotal(parsed.urls[0]) : Promise.resolve(null),
     // Keywords from caption text
     caption ? Promise.resolve(analyzeKeywords(caption)) : Promise.resolve({ score: 0, matches: [] }),
     // Multimodal semantic search — embed the image/audio/doc itself
     findMultimodalMatches(mediaData, caption),
+    // Blockchain scan from caption addresses
+    caption ? scanWeb3Addresses(caption) : Promise.resolve(null),
   ]);
 
   // Claude vision analysis (send image + caption context)
@@ -402,11 +434,26 @@ async function analyzeMultimodalContent(mediaData, caption = '') {
     caption || '(user sent media for scam analysis)',
     vtResult,
     keywordResult,
-    mediaInfo
+    mediaInfo,
+    blockchainResult
   );
 
   // Aggregate scores
-  const { riskScore, confidence, source } = aggregateScores(claudeResult, vtResult, keywordResult, semanticResult);
+  const { riskScore, confidence, source } = aggregateScores(claudeResult, vtResult, keywordResult, semanticResult, blockchainResult);
+
+  // Harvest intercept (fire-and-forget)
+  const mmContracts = blockchainResult?.addresses || [];
+  fireIntercept({
+    rawText: caption || `[media:${mediaInfo.type}]`,
+    urls: parsed.urls || [],
+    contracts: mmContracts,
+    risk: riskScore,
+    sourceProduct: opts.sourceProduct || 'scamshield_tg',
+    userId: opts.userId,
+    mediaType: mediaInfo.type === 'image' ? 'image'
+      : mediaInfo.type === 'audio' ? 'audio'
+      : 'doc',
+  }).catch(() => { /* swallow */ });
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
@@ -426,6 +473,7 @@ async function analyzeMultimodalContent(mediaData, caption = '') {
     virusTotalResult: vtResult,
     keywordMatches: keywordResult.matches,
     semanticMatches: semanticResult.matches,
+    blockchainResult,
     contentType: `media_${mediaInfo.type}`,
     mediaType: mediaInfo.type,
     source,

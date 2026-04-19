@@ -40,9 +40,11 @@ const registerLearn = require('./commands/learn');
 const registerMediaScan = require('./commands/mediaScan');
 const registerUpgrade = require('./commands/upgrade');
 const registerManage = require('./commands/manage');
+const registerContract = require('./commands/contract');
 
 registerHelp(bot);
 registerScan(bot);
+registerContract(bot);
 registerReport(bot);
 registerStatus(bot);
 registerPremium(bot);
@@ -68,6 +70,7 @@ startBatchFlush();
 const path = require('path');
 const app = express();
 const apiRouter = require('./routes/api');
+const internalScanRouter = require('./routes/internalScan');
 
 // Serve static files (landing page, logo, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
@@ -77,6 +80,7 @@ const createWebhookRouter = require('./routes/webhook');
 app.use('/webhooks/stripe', express.raw({ type: 'application/json' }), createWebhookRouter(bot));
 
 app.use('/api', apiRouter);
+app.use('/internal', internalScanRouter);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', mode: BOT_MODE, uptime: process.uptime() });
