@@ -3,7 +3,8 @@ const { insertScamReport, insertUserSubmission } = require('../database');
 const { formatMultimodalScanResult, escapeMarkdownV2 } = require('../utils/formatter');
 const { downloadTelegramFile, extractMediaInfo, isSupportedForEmbedding } = require('../mediaHandler');
 const { reviewScanResult, AEGIS_STATUS } = require('../aegisAgent');
-const { checkScanAllowance } = require('../metering');
+const { checkScanAllowance, bumpFreeScanUsage } = require('../metering');
+const { buildUpsellMessage } = require('../utils/upsell');
 
 module.exports = function registerMediaScanCommand(bot) {
   // Handle photos
@@ -44,13 +45,10 @@ async function handleMediaMessage(bot, msg) {
     return;
   }
 
-  // Check subscription
+  // Check subscription / free-tier allowance
   const check = await checkScanAllowance(userId);
   if (!check.allowed) {
-    const msg = check.reason === 'no_subscription'
-      ? 'ScamShield requires a subscription.\nType /upgrade to start your free 7-day trial.'
-      : `You've used all ${check.limit} scans this month.\nType /upgrade to go Unlimited.`;
-    return bot.sendMessage(chatId, msg);
+    return bot.sendMessage(chatId, buildUpsellMessage(check), { parse_mode: 'Markdown' });
   }
 
   // Show typing indicator
@@ -125,6 +123,17 @@ async function handleMediaMessage(bot, msg) {
     }
 
     await bot.sendMessage(chatId, formatted, { parse_mode: 'MarkdownV2' });
+
+    // Free-tier: bump + show remaining.
+    if (check.isFree) {
+      bumpFreeScanUsage(userId).then((newCount) => {
+        bot.sendMessage(
+          chatId,
+          `_${newCount}/${check.limit} free scans today${newCount >= check.limit ? ' — next reset 00:00 UTC' : ''}. /upgrade for unlimited._`,
+          { parse_mode: 'Markdown' }
+        ).catch(() => {});
+      }).catch(() => {});
+    }
 
     // Wait for DB writes in background
     await Promise.allSettled([reportPromise, submissionPromise]);

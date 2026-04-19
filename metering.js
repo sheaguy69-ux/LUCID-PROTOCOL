@@ -6,6 +6,9 @@ const TIER_LIMITS = {
   unlimited: Infinity,
 };
 
+// Free tier — harvest intel, upsell hard.
+const FREE_DAILY_LIMIT = parseInt(process.env.FREE_DAILY_LIMIT || '3', 10);
+
 function getCurrentMonth() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -63,31 +66,91 @@ async function countUserScansThisMonth(telegramUserId) {
 }
 
 /**
+ * Read today's free scan count for a user. No increment.
+ * Returns 0 on error (fail-open for the read path).
+ */
+async function getFreeScanCountToday(telegramUserId) {
+  try {
+    const { data, error } = await getSupabase().rpc('get_free_scan_count', {
+      p_user_id: telegramUserId,
+    });
+    if (error) throw error;
+    return typeof data === 'number' ? data : 0;
+  } catch (err) {
+    console.error('[metering] get_free_scan_count failed:', err.message);
+    return 0;
+  }
+}
+
+/**
+ * Atomically increment today's free scan count. Returns new count.
+ * Called AFTER a successful scan for free-tier users.
+ */
+async function bumpFreeScanUsage(telegramUserId) {
+  try {
+    const { data, error } = await getSupabase().rpc('bump_free_scan_usage', {
+      p_user_id: telegramUserId,
+    });
+    if (error) throw error;
+    return typeof data === 'number' ? data : 0;
+  } catch (err) {
+    console.error('[metering] bump_free_scan_usage failed:', err.message);
+    return 0;
+  }
+}
+
+/**
  * Check whether a user is allowed to scan.
- * Returns { allowed, reason?, tier, status, used?, limit? }
+ *
+ * Tier precedence:
+ *   1. Subscribed (active/trialing) → existing pro/unlimited limits
+ *   2. Non-subscriber → free tier: FREE_DAILY_LIMIT (default 3) Claude scans/UTC-day
+ *
+ * Returns { allowed, reason?, tier, status, used?, limit?, isFree? }
+ * When isFree=true, caller MUST call bumpFreeScanUsage() after a successful scan.
  */
 async function checkScanAllowance(telegramUserId) {
   const sub = await getSubscriberTier(telegramUserId);
+  const subscribed = sub.status === 'active' || sub.status === 'trialing';
 
-  if (sub.status !== 'active' && sub.status !== 'trialing') {
-    return { allowed: false, reason: 'no_subscription', tier: sub.tier, status: sub.status };
+  // Path 1: paid subscriber
+  if (subscribed) {
+    const limit = TIER_LIMITS[sub.tier];
+    if (limit === undefined) {
+      // Subscribed but unknown tier — fall through to free tier below.
+    } else if (limit === Infinity) {
+      return { allowed: true, tier: sub.tier, status: sub.status, isFree: false };
+    } else {
+      const used = await countUserScansThisMonth(telegramUserId);
+      if (used >= limit) {
+        return { allowed: false, reason: 'limit_exceeded', tier: sub.tier, status: sub.status, used, limit, isFree: false };
+      }
+      return { allowed: true, tier: sub.tier, status: sub.status, used, limit, isFree: false };
+    }
   }
 
-  const limit = TIER_LIMITS[sub.tier];
-  if (limit === undefined) {
-    return { allowed: false, reason: 'no_subscription', tier: sub.tier, status: sub.status };
+  // Path 2: free tier — harvest + upsell
+  const freeUsed = await getFreeScanCountToday(telegramUserId);
+  if (freeUsed >= FREE_DAILY_LIMIT) {
+    return {
+      allowed: false,
+      reason: 'free_limit_exceeded',
+      tier: 'free',
+      status: sub.status,
+      used: freeUsed,
+      limit: FREE_DAILY_LIMIT,
+      isFree: true,
+    };
   }
 
-  if (limit === Infinity) {
-    return { allowed: true, tier: sub.tier, status: sub.status };
-  }
-
-  const used = await countUserScansThisMonth(telegramUserId);
-  if (used >= limit) {
-    return { allowed: false, reason: 'limit_exceeded', tier: sub.tier, status: sub.status, used, limit };
-  }
-
-  return { allowed: true, tier: sub.tier, status: sub.status, used, limit };
+  return {
+    allowed: true,
+    tier: 'free',
+    status: sub.status,
+    used: freeUsed,
+    limit: FREE_DAILY_LIMIT,
+    isFree: true,
+  };
 }
 
 // --- Legacy API key usage tracking (still used by routes/api.js for per-key counting) ---
@@ -189,6 +252,7 @@ async function getUsageSummaryForUser(telegramUserId) {
 
 module.exports = {
   TIER_LIMITS,
+  FREE_DAILY_LIMIT,
   getCurrentMonth,
   checkScanAllowance,
   countUserScansThisMonth,
@@ -196,4 +260,6 @@ module.exports = {
   incrementUsage,
   getUsageSummary,
   getUsageSummaryForUser,
+  getFreeScanCountToday,
+  bumpFreeScanUsage,
 };
