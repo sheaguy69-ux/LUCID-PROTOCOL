@@ -124,15 +124,25 @@ async function handleMediaMessage(bot, msg) {
 
     await bot.sendMessage(chatId, formatted, { parse_mode: 'MarkdownV2' });
 
-    // Free-tier: bump + show remaining.
+    // Free-tier: bonus first, else bump daily.
     if (check.isFree) {
-      bumpFreeScanUsage(userId).then((newCount) => {
-        bot.sendMessage(
-          chatId,
-          `_${newCount}/${check.limit} free scans today${newCount >= check.limit ? ' — next reset 00:00 UTC' : ''}. /upgrade for unlimited._`,
-          { parse_mode: 'Markdown' }
-        ).catch(() => {});
-      }).catch(() => {});
+      if (check.isBonus) {
+        consumeBonusScan(userId).then((newBalance) => {
+          bot.sendMessage(
+            chatId,
+            `_Bonus scan used. ${newBalance ?? 0} bonus remaining. /invite friends for +5 each._`,
+            { parse_mode: 'Markdown' }
+          ).catch(() => {});
+        }).catch(() => {});
+      } else {
+        bumpFreeScanUsage(userId).then((newCount) => {
+          bot.sendMessage(
+            chatId,
+            `_${newCount}/${check.limit} free scans today${newCount >= check.limit ? ' — next reset 00:00 UTC. /invite for bonus scans.' : ''}. /upgrade for unlimited._`,
+            { parse_mode: 'Markdown' }
+          ).catch(() => {});
+        }).catch(() => {});
+      }
     }
 
     // Wait for DB writes in background

@@ -10,12 +10,11 @@ function buildUpsellMessage(check) {
       return [
         `🧱 You've hit today's *${FREE_DAILY_LIMIT} free deep scans*.`,
         ``,
-        `Upgrade for unlimited protection:`,
-        `• *Pro* — $8/mo · 1,000 scans/mo`,
-        `• *Unlimited* — $17/mo · unlimited`,
+        `Two ways to keep scanning:`,
+        `1. */invite* — share your link. *+5 scans* per friend that joins.`,
+        `2. */upgrade* — Pro $8/mo (1K scans) or Unlimited $17/mo.`,
         ``,
-        `Both include a 7-day free trial.`,
-        `Tap /upgrade to start.`,
+        `Free resets at 00:00 UTC. Both paid tiers include a 7-day trial.`,
       ].join('\n');
 
     case 'limit_exceeded':

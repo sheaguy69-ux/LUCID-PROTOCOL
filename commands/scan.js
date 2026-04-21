@@ -2,7 +2,7 @@ const { analyzeContent } = require('../scamDetector');
 const { insertScamReport, insertUserSubmission } = require('../database');
 const { formatScanResult, escapeMarkdownV2 } = require('../utils/formatter');
 const { reviewScanResult, AEGIS_STATUS } = require('../aegisAgent');
-const { checkScanAllowance, bumpFreeScanUsage } = require('../metering');
+const { checkScanAllowance, bumpFreeScanUsage, consumeBonusScan } = require('../metering');
 const { buildUpsellMessage } = require('../utils/upsell');
 
 module.exports = function registerScanCommand(bot) {
@@ -78,18 +78,28 @@ module.exports = function registerScanCommand(bot) {
 
       await bot.sendMessage(chatId, formatted, { parse_mode: 'MarkdownV2' });
 
-      // Free-tier: bump today's count AFTER successful scan.
+      // Free-tier: burn bonus first if isBonus, else bump today's count.
       if (check.isFree) {
-        bumpFreeScanUsage(userId).then((newCount) => {
-          const remaining = Math.max(0, (check.limit || 3) - newCount);
-          if (remaining >= 0) {
+        if (check.isBonus) {
+          consumeBonusScan(userId).then((newBalance) => {
             bot.sendMessage(
               chatId,
-              `_${newCount}/${check.limit} free scans today${remaining === 0 ? ' — next reset 00:00 UTC' : ''}. /upgrade for unlimited._`,
+              `_Bonus scan used. ${newBalance ?? 0} bonus remaining. /invite friends for +5 each._`,
               { parse_mode: 'Markdown' }
             ).catch(() => {});
-          }
-        }).catch(() => {});
+          }).catch(() => {});
+        } else {
+          bumpFreeScanUsage(userId).then((newCount) => {
+            const remaining = Math.max(0, (check.limit || 3) - newCount);
+            if (remaining >= 0) {
+              bot.sendMessage(
+                chatId,
+                `_${newCount}/${check.limit} free scans today${remaining === 0 ? ' — next reset 00:00 UTC. /invite for bonus scans.' : ''}. /upgrade for unlimited._`,
+                { parse_mode: 'Markdown' }
+              ).catch(() => {});
+            }
+          }).catch(() => {});
+        }
       }
 
       // Wait for DB writes to complete in background

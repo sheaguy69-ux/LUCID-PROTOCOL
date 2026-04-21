@@ -41,7 +41,10 @@ const registerMediaScan = require('./commands/mediaScan');
 const registerUpgrade = require('./commands/upgrade');
 const registerManage = require('./commands/manage');
 const registerContract = require('./commands/contract');
+const registerInvite = require('./commands/invite');
+const registerStart = require('./commands/start');
 
+registerStart(bot);
 registerHelp(bot);
 registerScan(bot);
 registerContract(bot);
@@ -54,6 +57,7 @@ registerLearn(bot);
 registerMediaScan(bot);
 registerUpgrade(bot);
 registerManage(bot);
+registerInvite(bot);
 
 // --- Initialize Aegis multi-agent oversight ---
 

@@ -83,6 +83,60 @@ async function getFreeScanCountToday(telegramUserId) {
 }
 
 /**
+ * Read referral stats for a user: current bonus balance + total referrals made.
+ */
+async function getReferralStats(telegramUserId) {
+  try {
+    const { data, error } = await getSupabase().rpc('get_referral_stats', {
+      p_user: telegramUserId,
+    });
+    if (error) throw error;
+    return {
+      balance: (data && data.balance) || 0,
+      referrals: (data && data.referrals) || 0,
+    };
+  } catch (err) {
+    console.error('[metering] get_referral_stats failed:', err.message);
+    return { balance: 0, referrals: 0 };
+  }
+}
+
+/**
+ * Grant a referrer +bonus scans for referring a new user. Idempotent on referred_id.
+ * Returns { credited, already_referred, new_balance }.
+ */
+async function grantReferralBonus(referrerId, referredId, bonus = 5) {
+  try {
+    const { data, error } = await getSupabase().rpc('grant_referral_bonus', {
+      p_referrer: referrerId,
+      p_referred: referredId,
+      p_bonus: bonus,
+    });
+    if (error) throw error;
+    return data || { credited: false };
+  } catch (err) {
+    console.error('[metering] grant_referral_bonus failed:', err.message);
+    return { credited: false, error: err.message };
+  }
+}
+
+/**
+ * Atomically consume 1 bonus scan. Returns new balance, or null if user had none.
+ */
+async function consumeBonusScan(telegramUserId) {
+  try {
+    const { data, error } = await getSupabase().rpc('consume_bonus_scan', {
+      p_user: telegramUserId,
+    });
+    if (error) throw error;
+    return typeof data === 'number' ? data : null;
+  } catch (err) {
+    console.error('[metering] consume_bonus_scan failed:', err.message);
+    return null;
+  }
+}
+
+/**
  * Atomically increment today's free scan count. Returns new count.
  * Called AFTER a successful scan for free-tier users.
  */
@@ -131,25 +185,43 @@ async function checkScanAllowance(telegramUserId) {
 
   // Path 2: free tier — harvest + upsell
   const freeUsed = await getFreeScanCountToday(telegramUserId);
-  if (freeUsed >= FREE_DAILY_LIMIT) {
+  if (freeUsed < FREE_DAILY_LIMIT) {
     return {
-      allowed: false,
-      reason: 'free_limit_exceeded',
+      allowed: true,
       tier: 'free',
       status: sub.status,
       used: freeUsed,
       limit: FREE_DAILY_LIMIT,
       isFree: true,
+      isBonus: false,
+    };
+  }
+
+  // Path 3: free exhausted — try bonus balance from referrals
+  const stats = await getReferralStats(telegramUserId);
+  if (stats.balance > 0) {
+    return {
+      allowed: true,
+      tier: 'free',
+      status: sub.status,
+      used: freeUsed,
+      limit: FREE_DAILY_LIMIT,
+      bonusBalance: stats.balance,
+      isFree: true,
+      isBonus: true,
     };
   }
 
   return {
-    allowed: true,
+    allowed: false,
+    reason: 'free_limit_exceeded',
     tier: 'free',
     status: sub.status,
     used: freeUsed,
     limit: FREE_DAILY_LIMIT,
+    bonusBalance: 0,
     isFree: true,
+    isBonus: false,
   };
 }
 
@@ -262,4 +334,7 @@ module.exports = {
   getUsageSummaryForUser,
   getFreeScanCountToday,
   bumpFreeScanUsage,
+  getReferralStats,
+  grantReferralBonus,
+  consumeBonusScan,
 };
