@@ -125,6 +125,41 @@ function formatContractResult(blockchainResult, claudeResult = null) {
       lines.push(`*Holders:* ${e(String(ts.holder_count))}`);
     }
 
+    const md = r.marketData;
+    if (md) {
+      if (md.price != null) {
+        const priceStr = md.price < 0.000001
+          ? md.price.toExponential(2)
+          : md.price < 0.01
+          ? md.price.toFixed(8)
+          : md.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+        lines.push(`*Price:* $${e(priceStr)}`);
+      }
+      if (md.marketCap != null) {
+        const mcap = md.marketCap >= 1e9
+          ? `$${(md.marketCap / 1e9).toFixed(2)}B`
+          : md.marketCap >= 1e6
+          ? `$${(md.marketCap / 1e6).toFixed(2)}M`
+          : `$${Math.round(md.marketCap).toLocaleString('en-US')}`;
+        const mcapWarn = md.marketCap < 100_000 ? ' ⚠️' : md.marketCap < 1_000_000 ? ' 🔸' : '';
+        lines.push(`*Market Cap:* ${e(mcap)}${mcapWarn}`);
+      }
+      if (md.volume24h != null) {
+        const vol = md.volume24h >= 1e9
+          ? `$${(md.volume24h / 1e9).toFixed(2)}B`
+          : md.volume24h >= 1e6
+          ? `$${(md.volume24h / 1e6).toFixed(2)}M`
+          : `$${Math.round(md.volume24h).toLocaleString('en-US')}`;
+        const volWarn = md.volume24h < 1000 ? ' ⚠️' : '';
+        lines.push(`*24h Volume:* ${e(vol)}${volWarn}`);
+      }
+      if (md.change24h != null) {
+        const sign = md.change24h >= 0 ? '+' : '';
+        const changeWarn = md.change24h > 100 ? ' 🔴' : md.change24h > 50 ? ' ⚠️' : '';
+        lines.push(`*24h Change:* ${e(`${sign}${md.change24h.toFixed(2)}%`)}${changeWarn}`);
+      }
+    }
+
     const activeFlags = FLAG_ORDER.filter((k) => r.flags[k]);
     if (activeFlags.length > 0) {
       lines.push(``, `*Red Flags:*`);
@@ -147,7 +182,8 @@ function formatContractResult(blockchainResult, claudeResult = null) {
     lines.push(`*Advice:*`, e(claudeResult.advice), ``);
   }
 
-  lines.push(`_Powered by GoPlus Security_`);
+  const hasMarketData = blockchainResult.results.some((r) => r.marketData);
+  lines.push(`_Powered by GoPlus Security${hasMarketData ? ' \\+ CoinGecko' : ''}_`);
   return lines.join('\n');
 }
 

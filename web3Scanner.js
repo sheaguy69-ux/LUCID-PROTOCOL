@@ -1,3 +1,5 @@
+const { fetchMarketData } = require('./utils/marketData');
+
 const EVM_ADDRESS_RE = /\b(0x[a-fA-F0-9]{40})\b/g;
 
 const CHAIN_MAP = {
@@ -96,7 +98,10 @@ async function scanWeb3Addresses(text, chainHint = null) {
       const tokenSecurity = firstHit !== -1 ? chainChecks[firstHit] : null;
       const resolvedChainId = firstHit !== -1 ? chains[firstHit] : chains[0];
 
-      const addressSecurity = await checkAddressSecurity(address);
+      const [addressSecurity, marketData] = await Promise.all([
+        checkAddressSecurity(address),
+        tokenSecurity ? fetchMarketData(address, resolvedChainId) : null,
+      ]);
 
       const flags = {
         isHoneypot: flag(tokenSecurity?.is_honeypot),
@@ -119,6 +124,7 @@ async function scanWeb3Addresses(text, chainHint = null) {
         chainName: CHAIN_MAP[resolvedChainId] || `Chain ${resolvedChainId}`,
         tokenSecurity,
         addressSecurity,
+        marketData,
         flags,
         riskLevel,
       };

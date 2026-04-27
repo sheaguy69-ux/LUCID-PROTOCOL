@@ -203,11 +203,14 @@ Return ONLY valid JSON with this exact structure:
 
     contentParts.push({ type: 'text', text: textPrompt });
 
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: contentParts }],
-    });
+    const message = await client.messages.create(
+      {
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: contentParts }],
+      },
+      { timeout: 30_000 },
+    );
 
     const text = message.content[0]?.text || '';
     // Strip markdown fences if present
