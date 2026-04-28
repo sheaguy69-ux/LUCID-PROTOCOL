@@ -43,8 +43,10 @@ const registerManage = require('./commands/manage');
 const registerContract = require('./commands/contract');
 const registerInvite = require('./commands/invite');
 const registerStart = require('./commands/start');
+const registerPing = require('./commands/ping');
 
 registerStart(bot);
+registerPing(bot);
 registerHelp(bot);
 registerScan(bot);
 registerContract(bot);
@@ -100,9 +102,20 @@ if (BOT_MODE === 'webhook') {
 
   app.listen(PORT, async () => {
     const webhookUrl = `${WEBHOOK_URL}/webhook/${TOKEN}`;
-    await bot.setWebHook(webhookUrl);
-    console.log(`ScamShield bot running in webhook mode on port ${PORT}`);
-    console.log(`Webhook set to ${WEBHOOK_URL}/webhook/***`);
+    try {
+      await bot.setWebHook(webhookUrl);
+      // Verify it actually stuck
+      const info = await bot.getWebHookInfo();
+      if (!info.url || !info.url.includes(TOKEN)) {
+        console.error(`[FATAL] Webhook verification failed. Expected token in URL, got: ${info.url}`);
+        process.exit(1);
+      }
+      console.log(`ScamShield bot running in webhook mode on port ${PORT}`);
+      console.log(`Webhook verified: ${WEBHOOK_URL}/webhook/***`);
+    } catch (err) {
+      console.error(`[FATAL] Failed to set webhook: ${err.message}`);
+      process.exit(1);
+    }
   });
 } else {
   // In polling mode, still start Express for health checks
