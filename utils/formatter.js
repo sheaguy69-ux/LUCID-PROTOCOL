@@ -49,6 +49,18 @@ function formatScanResult(result) {
     lines.push('', `*On\\-Chain:*`, blockchainSection);
   }
 
+  const hasSocialHandles = result.socialHandles?.length > 0;
+  const hasSocialPlatforms = result.socialPlatforms?.length > 0;
+  if (hasSocialHandles || hasSocialPlatforms) {
+    const platformStr = hasSocialPlatforms
+      ? ` \\(${result.socialPlatforms.map(e).join(', ')}\\)`
+      : '';
+    const handleStr = hasSocialHandles
+      ? result.socialHandles.map((h) => `\`@${e(h)}\``).join(', ')
+      : '_URL only_';
+    lines.push('', `*Social${platformStr}:* ${handleStr}`);
+  }
+
   const elapsed = result.elapsed ? `${e(result.elapsed)}` : '';
   lines.push('', `_${elapsed ? `Scanned in ${elapsed}s` : 'Scan complete'}_`);
 

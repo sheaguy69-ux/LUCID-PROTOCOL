@@ -117,7 +117,9 @@ const KEYWORDS = {
     'pump', 'moon', 'lambo', 'passive income', 'financial freedom',
     'exclusive opportunity', 'whitelisted', 'early access', 'private sale',
     'insider', 'next 100x', 'dont miss', "don't miss", 'last chance',
-    'limited time', 'join now', 'dm me',
+    'limited time', 'join now', 'dm me', 'message me', 'contact me',
+    'reach me', 'follow me', 'add me on', 'dm for info', 'dm for details',
+    'dm to join', 'dm for access', 'hit me up',
   ],
   low: [
     'invest', 'token', 'airdrop', 'nft', 'defi', 'yield', 'staking',
@@ -125,7 +127,10 @@ const KEYWORDS = {
   ],
 };
 
-function analyzeKeywords(text) {
+// DM-redirect patterns: "dm @handle", "contact @handle", etc.
+const DM_REDIRECT_RE = /\b(dm|message|contact|reach|text|follow|add|hit up)\s+@[a-zA-Z0-9_]{3,30}/i;
+
+function analyzeKeywords(text, handles = []) {
   const lower = text.toLowerCase();
   const matches = [];
   let score = 0;
@@ -149,12 +154,23 @@ function analyzeKeywords(text) {
     }
   }
 
+  // Handle-specific signals
+  if (handles.length > 0) {
+    if (DM_REDIRECT_RE.test(text)) {
+      matches.push(`DM redirect to @handle`);
+      score += 3;
+    } else if (handles.length >= 2) {
+      matches.push(`multiple social handles`);
+      score += 1;
+    }
+  }
+
   return { score: Math.min(score, 10), matches };
 }
 
 // --- Claude Analysis (supports multimodal via vision) ---
 
-async function analyzeWithClaude(input, vtResult, keywordResult, mediaInfo = null, blockchainResult = null) {
+async function analyzeWithClaude(input, vtResult, keywordResult, mediaInfo = null, blockchainResult = null, socialContext = null) {
   try {
     const client = getAnthropic();
 
@@ -173,6 +189,15 @@ async function analyzeWithClaude(input, vtResult, keywordResult, mediaInfo = nul
     }
     if (blockchainResult?.maliciousWalletDetected) {
       contextParts.push('Blockchain: Malicious wallet flagged by GoPlus Security');
+    }
+    if (socialContext?.handles?.length > 0 || socialContext?.platforms?.length > 0) {
+      const platformStr = socialContext.platforms?.length > 0
+        ? ` on ${socialContext.platforms.join(', ')}`
+        : '';
+      const handleStr = socialContext.handles?.length > 0
+        ? `: ${socialContext.handles.map((h) => '@' + h).join(', ')}`
+        : '';
+      contextParts.push(`Social media detected${platformStr}${handleStr} — check for DM-redirect scams, impersonation, fake giveaway accounts, fake investment groups`);
     }
 
     const contextStr = contextParts.length > 0
@@ -344,15 +369,16 @@ async function analyzeContent(input, opts = {}) {
   const parsed = parseInput(input);
 
   // Stage 2, 3, 4 & 5: Run VT, keywords, semantic search, and blockchain scan in parallel
+  const socialContext = { handles: parsed.handles, platform: parsed.platform, platforms: parsed.platforms };
   const [vtResult, keywordResult, semanticResult, blockchainResult] = await Promise.all([
     parsed.urls.length > 0 ? checkVirusTotal(parsed.urls[0]) : Promise.resolve(null),
-    Promise.resolve(analyzeKeywords(parsed.text)),
+    Promise.resolve(analyzeKeywords(parsed.text, parsed.handles)),
     findSemanticMatches(parsed.text),
     scanWeb3Addresses(parsed.text),
   ]);
 
   // Stage 6: Claude analysis
-  const claudeResult = await analyzeWithClaude(input, vtResult, keywordResult, null, blockchainResult);
+  const claudeResult = await analyzeWithClaude(input, vtResult, keywordResult, null, blockchainResult, socialContext);
 
   // Stage 7: Aggregate scores
   const { riskScore, confidence, source } = aggregateScores(claudeResult, vtResult, keywordResult, semanticResult, blockchainResult);
@@ -393,6 +419,9 @@ async function analyzeContent(input, opts = {}) {
     keywordMatches: keywordResult.matches,
     semanticMatches: semanticResult.matches,
     blockchainResult,
+    socialHandles: parsed.handles,
+    socialPlatform: parsed.platform,
+    socialPlatforms: parsed.platforms,
     contentType: parsed.contentType,
     source,
     elapsed,
