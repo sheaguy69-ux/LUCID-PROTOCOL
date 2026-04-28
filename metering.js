@@ -9,6 +9,12 @@ const TIER_LIMITS = {
 // Free tier — harvest intel, upsell hard.
 const FREE_DAILY_LIMIT = parseInt(process.env.FREE_DAILY_LIMIT || '3', 10);
 
+// White label user IDs (comma-separated) that bypass free tier limits entirely
+const WHITELABEL_USER_IDS = (process.env.WHITELABEL_USER_IDS || '')
+  .split(',')
+  .map((id) => id.trim())
+  .filter((id) => id);
+
 function getCurrentMonth() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -157,13 +163,19 @@ async function bumpFreeScanUsage(telegramUserId) {
  * Check whether a user is allowed to scan.
  *
  * Tier precedence:
- *   1. Subscribed (active/trialing) → existing pro/unlimited limits
- *   2. Non-subscriber → free tier: FREE_DAILY_LIMIT (default 3) Claude scans/UTC-day
+ *   1. White label (unlimited) → bypass all limits
+ *   2. Subscribed (active/trialing) → existing pro/unlimited limits
+ *   3. Non-subscriber → free tier: FREE_DAILY_LIMIT (default 3) Claude scans/UTC-day
  *
  * Returns { allowed, reason?, tier, status, used?, limit?, isFree? }
  * When isFree=true, caller MUST call bumpFreeScanUsage() after a successful scan.
  */
 async function checkScanAllowance(telegramUserId) {
+  // Path 0: white label user — unlimited access
+  if (WHITELABEL_USER_IDS.includes(String(telegramUserId))) {
+    return { allowed: true, tier: 'unlimited', status: 'whitelabel', isFree: false };
+  }
+
   const sub = await getSubscriberTier(telegramUserId);
   const subscribed = sub.status === 'active' || sub.status === 'trialing';
 
