@@ -194,6 +194,8 @@ router.get('/usage', authenticateApiKey, async (req, res) => {
 // --- Public Stats (no auth required) ---
 
 router.get('/stats', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', 'https://scamshield.dev');
+  res.set('Access-Control-Allow-Methods', 'GET');
   try {
     const stats = await getReportStats();
     res.json(stats);
