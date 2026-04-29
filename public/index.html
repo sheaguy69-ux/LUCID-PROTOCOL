@@ -272,6 +272,39 @@
       50% { opacity: 0.3; }
     }
 
+    /* --- Live Stats Bar --- */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin: 56px 0 0;
+      padding: 32px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--purple-light);
+      display: block;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
     /* --- Features --- */
     .features {
       padding: 80px 0;
@@ -528,7 +561,7 @@
       </p>
 
       <div class="cta-group">
-        <a href="https://t.me/YourBotUsername" class="btn btn-primary">
+        <a href="https://t.me/SGbutta_bot" class="btn btn-primary">
           Open in Telegram
         </a>
         <a href="#pricing" class="btn btn-secondary">
@@ -543,6 +576,22 @@
         <div class="threat-badge"><span class="dot"></span> Phishing</div>
       </div>
     </section>
+
+    <!-- Live Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-value" id="stat-scans">—</span>
+        <span class="stat-label">Total Scans</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-reports">—</span>
+        <span class="stat-label">Community Reports</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-threats">—</span>
+        <span class="stat-label">Threats Detected</span>
+      </div>
+    </div>
 
     <!-- Features -->
     <section class="features" id="features">
@@ -620,7 +669,7 @@
             <li>API access</li>
             <li>Priority support</li>
           </ul>
-          <a href="https://t.me/YourBotUsername" class="btn btn-primary" style="width:100%;justify-content:center;">Start Free Trial</a>
+          <a href="https://t.me/SGbutta_bot" class="btn btn-primary" style="width:100%;justify-content:center;">Start Free Trial</a>
         </div>
         <div class="price-card">
           <div class="tier">Unlimited</div>
@@ -632,7 +681,7 @@
             <li>Admin dashboard + audit logs</li>
             <li>Custom Aegis policies</li>
           </ul>
-          <a href="https://t.me/YourBotUsername" class="btn btn-primary" style="width:100%;justify-content:center;">Start Free Trial</a>
+          <a href="https://t.me/SGbutta_bot" class="btn btn-primary" style="width:100%;justify-content:center;">Start Free Trial</a>
         </div>
       </div>
     </section>
@@ -642,5 +691,21 @@
       <p>ScamShield &mdash; built by <a href="#">BUTTA / Gateway Visions</a></p>
     </footer>
   </div>
+  <script>
+    function formatNum(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M+';
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'K+';
+      return n.toLocaleString();
+    }
+
+    fetch('/api/stats')
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('stat-scans').textContent = formatNum(data.totalScans);
+        document.getElementById('stat-reports').textContent = formatNum(data.communityReports);
+        document.getElementById('stat-threats').textContent = formatNum(data.highRiskDetected);
+      })
+      .catch(() => {});
+  </script>
 </body>
 </html>

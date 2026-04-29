@@ -4,6 +4,7 @@ const { analyzeContent } = require('../scamDetector');
 const { logScan } = require('../usageTracking');
 const { incrementUsage, getUsageSummary, checkScanAllowance, TIER_LIMITS } = require('../metering');
 const { checkRateLimit, reviewScanResult, AEGIS_STATUS } = require('../aegisAgent');
+const { getReportStats } = require('../database');
 
 const router = express.Router();
 
@@ -187,6 +188,17 @@ router.get('/usage', authenticateApiKey, async (req, res) => {
   } catch (err) {
     console.error('API usage error:', err.message);
     res.status(500).json({ error: 'Failed to retrieve usage data.' });
+  }
+});
+
+// --- Public Stats (no auth required) ---
+
+router.get('/stats', async (req, res) => {
+  try {
+    const stats = await getReportStats();
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch stats.' });
   }
 });
 
