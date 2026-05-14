@@ -124,31 +124,6 @@ function formatPools(pools, tier) {
   return lines.join('\n');
 }
 
-function formatAlerts(tier, poolCount) {
-  const isActive = tier === 'active' || tier === 'enterprise';
-  const displayTier = isActive ? tier.charAt(0).toUpperCase() + tier.slice(1) : 'Free';
-  const lines = [
-    '🔔 *Abyssal Alert Status*',
-    '',
-    `Tier: *${displayTier}*`,
-    `Active pools: ${poolCount || 0}`,
-    'Attacks detected: 0',
-    'Attacks blocked: 0',
-    'Value saved: 0 ETH',
-    '',
-  ];
-  if (isActive) {
-    lines.push('Active defense is enabled. We\'re watching your pools.');
-  } else {
-    lines.push(
-      'You\'re on the free tier — alerts only, no active defense.',
-      '',
-      'Upgrade to *Active Defense* for automatic MEV protection.',
-      'Pay only on value saved (17% commission).',
-    );
-  }
-  return lines.join('\n');
-}
 
 function formatStats() {
   return [
@@ -204,7 +179,7 @@ const RE_UPGRADE   = /^\/abyssal(?:@\w+)?\s+upgrade$/;
 const RE_SAVED     = /^\/abyssal(?:@\w+)?\s+saved$/;
 const RE_MONITOR   = /^\/abyssal(?:@\w+)?\s+monitor$/;
 const RE_WATCH     = /^\/abyssal(?:@\w+)?\s+watch\s+(.+)$/i;
-const RE_CATCHALL  = /^\/abyssal(?:@\w+)?\s+(.+)$/;
+const RE_CATCHALL  = /^\/abyssal(?:@\w+)?\s+(?!pools\b|watch\b|alerts\b|stats\b|upgrade\b|saved\b|monitor\b)(.+)$/;
 
 module.exports = function registerAbyssal(bot) {
   // --- /abyssal — main landing ---
@@ -356,7 +331,7 @@ module.exports = function registerAbyssal(bot) {
       } catch (_) { /* non-blocking */ }
     }
 
-    const stats = formatStats().replace('0', String(poolCount), 1);
+    const stats = formatStats().replace('0', String(poolCount));
     bot.sendMessage(msg.chat.id, stats, { parse_mode: 'Markdown' });
   });
 

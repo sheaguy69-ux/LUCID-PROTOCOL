@@ -116,11 +116,14 @@ async function handleSubscriptionUpdated(subscription) {
   let tier = subscriber.subscription_tier;
   const proPriceId = process.env.STRIPE_PRO_PRICE_ID;
   const unlimitedPriceId = process.env.STRIPE_UNLIMITED_PRICE_ID;
+  const abyssalActivePriceId = process.env.STRIPE_ABYSSAL_ACTIVE_PRICE_ID;
 
   if (subscription.items?.data?.[0]?.price?.id === proPriceId) {
     tier = 'pro';
   } else if (subscription.items?.data?.[0]?.price?.id === unlimitedPriceId) {
     tier = 'unlimited';
+  } else if (subscription.items?.data?.[0]?.price?.id === abyssalActivePriceId) {
+    tier = 'abyssal_active';
   }
 
   await upsertSubscriber({

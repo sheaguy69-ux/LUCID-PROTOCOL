@@ -12,6 +12,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const { ALCHEMY_HOSTS } = require('./alchemyClient');
 const { recordSaveEvent } = require('./commissionEngine');
+const { sendAttackDetected } = require('./abyssalNotifier');
 
 // ── Constants ─────────────────────────────────────────────────────────
 
@@ -81,7 +82,8 @@ async function rpc(chainId, method, params) {
 // ── MempoolDetector Class ────────────────────────────────────────────
 
 class MempoolDetector {
-  constructor() {
+  constructor(bot) {
+    this.bot = bot || null;
     this.running = false;
     this.pollInterval = null;
     this.intervalMs = parseInt(process.env.MEMPOOL_POLL_MS || '30000', 10); // 30s default
@@ -387,6 +389,13 @@ class MempoolDetector {
 
       this.detectionCount++;
 
+      if (this.bot) {
+        sendAttackDetected(this.bot, pool.telegram_user_id, {
+          ...attack,
+          poolAddress: pool.pool_address,
+        });
+      }
+
       const ethValue = (Number(attack.estimatedValueAtRisk || '0') / 1e18).toFixed(6);
       console.log(
         `[mempoolDetector] detected ${attack.type} attack on ${pool.pool_address.slice(0, 10)} — ${ethValue} ETH saved`
@@ -428,11 +437,12 @@ let singleton = null;
 
 /**
  * Create or return the singleton MempoolDetector instance.
+ * @param {Object} [bot] - Telegram bot instance (only used on first call)
  * @returns {MempoolDetector}
  */
-function createMempoolDetector() {
+function createMempoolDetector(bot) {
   if (!singleton) {
-    singleton = new MempoolDetector();
+    singleton = new MempoolDetector(bot);
   }
   return singleton;
 }

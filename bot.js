@@ -78,9 +78,6 @@ registerAbyssal(bot);
 const aegis = require('./aegisAgent');
 aegis.init();
 
-// ── Abyssal Notifier ──
-const abyssalNotifier = require('./utils/abyssalNotifier');
-
 // --- Start usage tracking batch flush ---
 
 const { startBatchFlush, flushBuffer } = require('./usageTracking');
@@ -88,10 +85,13 @@ startBatchFlush();
 
 // ── Mempool Detector ──
 const { createMempoolDetector } = require('./utils/mempoolDetector');
-const detector = createMempoolDetector();
+const detector = createMempoolDetector(bot);
 detector.start();
 process.once('SIGTERM', () => { detector.stop(); });
-process.once('SIGINT', () => { detector.stop(); });
+process.once('SIGINT', () => {
+  detector.stop();
+  process.exit(0);
+});
 
 // --- Express server (webhook mode + health check) ---
 

@@ -314,6 +314,7 @@ async function deleteUserData(telegramUserId) {
 
   const userScopedTables = [
     'api_keys',
+    'commission_transactions',
     'subscribers',
     'scam_reports',
     'user_submissions',
