@@ -1,11 +1,12 @@
 const COINGECKO_PLATFORM = {
-  1:     'ethereum',
-  56:    'binance-smart-chain',
-  137:   'polygon-pos',
-  42161: 'arbitrum-one',
-  8453:  'base',
-  10:    'optimistic-ethereum',
-  43114: 'avalanche',
+  1:        'ethereum',
+  56:       'binance-smart-chain',
+  137:      'polygon-pos',
+  42161:    'arbitrum-one',
+  8453:     'base',
+  10:       'optimistic-ethereum',
+  43114:    'avalanche',
+  solana:   'solana',
 };
 
 async function fetchMarketData(address, chainId) {

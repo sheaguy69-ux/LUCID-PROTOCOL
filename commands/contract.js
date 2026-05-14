@@ -1,10 +1,12 @@
-const { scanWeb3Addresses } = require('../web3Scanner');
+const { scanWeb3Addresses, SOLANA_KEY } = require('../web3Scanner');
 const { formatContractResult, escapeMarkdownV2 } = require('../utils/formatter');
-const { checkScanAllowance, bumpFreeScanUsage } = require('../metering');
+const { checkScanAllowance, bumpFreeScanUsage, consumeBonusScan } = require('../metering');
 const { buildUpsellMessage } = require('../utils/upsell');
 const { fireIntercept } = require('../intelClient');
+const { buildContractCrossSell } = require('../utils/abyssalCrossSell');
 
 const EVM_ADDRESS_RE = /\b(0x[a-fA-F0-9]{40})\b/;
+const SOL_ADDRESS_RE = /\b([1-9A-HJ-NP-Za-km-z]{43,44})\b/;
 
 const CHAIN_HINTS = {
   eth: 1, ethereum: 1,
@@ -14,6 +16,7 @@ const CHAIN_HINTS = {
   base: 8453,
   op: 10, optimism: 10,
   avax: 43114, avalanche: 43114,
+  sol: SOLANA_KEY, solana: SOLANA_KEY, spl: SOLANA_KEY,
 };
 
 module.exports = function registerContractCommand(bot) {
@@ -22,10 +25,10 @@ module.exports = function registerContractCommand(bot) {
     const userId = msg.from.id;
     const input = match[1].trim();
 
-    if (!EVM_ADDRESS_RE.test(input)) {
+    if (!EVM_ADDRESS_RE.test(input) && !SOL_ADDRESS_RE.test(input)) {
       return bot.sendMessage(
         chatId,
-        'No valid EVM address found\\.\n\nUsage: `/contract [address] [chain?]`\n\nExamples:\n`/contract 0xdAC17F958D2ee523a2206206994597C13D831ec7`\n`/contract 0x\\.\\.\\. bsc`',
+        'No valid EVM or Solana address found\\.\n\nUsage: `/contract [address] [chain?]`\n\nExamples:\n`/contract 0xdAC17F958D2ee523a2206206994597C13D831ec7`\n`/contract 0x\\.\\.\\. bsc`\n`/contract EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v sol`',
         { parse_mode: 'MarkdownV2' }
       );
     }
@@ -50,6 +53,13 @@ module.exports = function registerContractCommand(bot) {
 
       const formatted = formatContractResult(blockchainResult);
       await bot.sendMessage(chatId, formatted, { parse_mode: 'MarkdownV2' });
+
+      // Abyssal cross-sell — free-tier contract scanners are prime Abyssal targets
+      if (check.isFree) {
+        buildContractCrossSell(userId).then((msg) => {
+          if (msg) bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' }).catch(() => {});
+        }).catch(() => {});
+      }
 
       // Harvest intercept — honeypot/malicious wallet = high-value intel.
       // intelClient gates internally on risk threshold.
@@ -95,7 +105,7 @@ module.exports = function registerContractCommand(bot) {
   bot.onText(/\/contract(?:@\w+)?$/, (msg) => {
     bot.sendMessage(
       msg.chat.id,
-      'Usage: `/contract [address] [chain?]`\n\nExamples:\n`/contract 0xdAC17F958D2ee523a2206206994597C13D831ec7`\n`/contract 0x... bsc`\n`/contract 0x... polygon`',
+      'Usage: `/contract [address] [chain?]`\n\nExamples:\n`/contract 0xdAC17F958D2ee523a2206206994597C13D831ec7`\n`/contract 0x... bsc`\n`/contract 0x... polygon`\n`/contract EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v sol`',
       { parse_mode: 'Markdown' }
     );
   });

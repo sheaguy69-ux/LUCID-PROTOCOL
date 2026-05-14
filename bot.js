@@ -44,6 +44,12 @@ const registerContract = require('./commands/contract');
 const registerInvite = require('./commands/invite');
 const registerStart = require('./commands/start');
 const registerPing = require('./commands/ping');
+const registerSecurity = require('./commands/security');
+const registerPrivacy = require('./commands/privacy');
+const registerOptout = require('./commands/optout');
+const registerDelete = require('./commands/delete');
+const registerPortfolio = require('./commands/portfolio');
+const registerAbyssal = require('./commands/abyssal');
 
 registerStart(bot);
 registerPing(bot);
@@ -60,6 +66,12 @@ registerMediaScan(bot);
 registerUpgrade(bot);
 registerManage(bot);
 registerInvite(bot);
+registerSecurity(bot);
+registerPrivacy(bot);
+registerOptout(bot);
+registerDelete(bot);
+registerPortfolio(bot);
+registerAbyssal(bot);
 
 // --- Initialize Aegis multi-agent oversight ---
 

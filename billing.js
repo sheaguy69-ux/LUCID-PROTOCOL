@@ -13,6 +13,7 @@ function getStripe() {
 const TIER_PRICES = {
   pro: () => process.env.STRIPE_PRO_PRICE_ID,
   unlimited: () => process.env.STRIPE_UNLIMITED_PRICE_ID,
+  abyssal_active: () => process.env.STRIPE_ABYSSAL_ACTIVE_PRICE_ID,
 };
 
 async function createCheckoutSession(telegramUserId, telegramUsername, tier) {
@@ -21,11 +22,10 @@ async function createCheckoutSession(telegramUserId, telegramUsername, tier) {
 
   const baseUrl = process.env.WEBHOOK_URL || `http://localhost:${process.env.PORT || 3000}`;
 
-  const session = await getStripe().checkout.sessions.create({
+  const params = {
     mode: 'subscription',
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],
-    subscription_data: { trial_period_days: 7 },
     client_reference_id: String(telegramUserId),
     metadata: {
       telegram_user_id: String(telegramUserId),
@@ -34,8 +34,21 @@ async function createCheckoutSession(telegramUserId, telegramUsername, tier) {
     },
     success_url: `${baseUrl}/payment-success`,
     cancel_url: `${baseUrl}/payment-cancel`,
-  });
+  };
 
+  // Abyssal Active Defense: no free trial (commission-based, only charge on save)
+  // ScamShield tiers: 7-day trial
+  if (tier === 'abyssal_active') {
+    params.subscription_data = {
+      // No free trial — user pays $0 unless value is saved
+      // The $0 subscription is a placeholder for commission tracking.
+      // Real billing happens via commission_transactions.
+    };
+  } else {
+    params.subscription_data = { trial_period_days: 7 };
+  }
+
+  const session = await getStripe().checkout.sessions.create(params);
   return session;
 }
 

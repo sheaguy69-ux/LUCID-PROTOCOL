@@ -311,6 +311,7 @@ function formatHelp() {
     `/usage — View your usage \\& subscription`,
     `/status — Bot status \\& statistics`,
     `/help — Show this message`,
+    `/abyssal — MEV defense for LP pools (commission\\-based)`,
     ``,
     `*How it works:*`,
     `Send any suspicious message, link, offer, screenshot, or voice note and ScamShield will analyze it using AI, URL reputation scanning, and pattern matching to give you a risk score from 1\\-10\\.`,

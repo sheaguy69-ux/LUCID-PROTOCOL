@@ -4,6 +4,7 @@ const { formatScanResult, escapeMarkdownV2 } = require('../utils/formatter');
 const { reviewScanResult, AEGIS_STATUS } = require('../aegisAgent');
 const { checkScanAllowance, bumpFreeScanUsage, consumeBonusScan } = require('../metering');
 const { buildUpsellMessage } = require('../utils/upsell');
+const { buildScanCrossSell } = require('../utils/abyssalCrossSell');
 
 module.exports = function registerScanCommand(bot) {
   // Match /scan followed by any text
@@ -80,6 +81,10 @@ module.exports = function registerScanCommand(bot) {
 
       // Free-tier: burn bonus first if isBonus, else bump today's count.
       if (check.isFree) {
+        // Abyssal cross-sell — skip if user already on abyssal_active
+        buildScanCrossSell(userId).then((msg) => {
+          if (msg) bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' }).catch(() => {});
+        }).catch(() => {});
         if (check.isBonus) {
           consumeBonusScan(userId).then((newBalance) => {
             bot.sendMessage(

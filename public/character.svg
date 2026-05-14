@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Gradients matching ScamShield's purple aesthetic -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0a1a"/>
+      <stop offset="100%" stop-color="#12122a"/>
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="cyberGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="50%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#5b21b6"/>
+    </linearGradient>
+    <linearGradient id="eyeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="visorGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.2"/>
+      <stop offset="50%" stop-color="#a78bfa" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.2"/>
+    </linearGradient>
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="20" fill="url(#bgGrad)"/>
+
+  <!-- Grid pattern (subtle) -->
+  <g opacity="0.04">
+    <line x1="0" y1="64" x2="512" y2="64" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="0" y1="128" x2="512" y2="128" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="0" y1="192" x2="512" y2="192" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="0" y1="256" x2="512" y2="256" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="0" y1="320" x2="512" y2="320" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="0" y1="384" x2="512" y2="384" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="0" y1="448" x2="512" y2="448" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="64" y1="0" x2="64" y2="512" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="128" y1="0" x2="128" y2="512" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="192" y1="0" x2="192" y2="512" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="256" y1="0" x2="256" y2="512" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="320" y1="0" x2="320" y2="512" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="384" y1="0" x2="384" y2="512" stroke="#7c3aed" stroke-width="0.5"/>
+    <line x1="448" y1="0" x2="448" y2="512" stroke="#7c3aed" stroke-width="0.5"/>
+  </g>
+
+  <!-- Core ambient glow -->
+  <circle cx="256" cy="256" r="140" fill="url(#coreGlow)"/>
+
+  <!-- Outer orbit ring -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="rgba(124,58,237,0.08)" stroke-width="1.5" transform="rotate(-30 256 256)">
+    <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="25s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Inner orbit ring (counter-rotating) -->
+  <circle cx="256" cy="256" r="170" fill="none" stroke="rgba(167,139,250,0.06)" stroke-width="1" transform="rotate(45 256 256)">
+    <animateTransform attributeName="transform" type="rotate" from="360 256 256" to="0 256 256" dur="20s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Orbital data dots -->
+  <g>
+    <circle cx="447" cy="106" r="3" fill="#a78bfa" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="447" cy="406" r="2.5" fill="#7c3aed" opacity="0.4">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="65" cy="106" r="2" fill="#c084fc" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="211" cy="450" r="2.5" fill="#a78bfa" opacity="0.3">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- === CHARACTER: Aegis Agent — "The Watcher" === -->
+
+  <!-- Shoulders / upper body -->
+  <path d="M 156 380 Q 160 340 180 320 L 332 320 Q 352 340 356 380 Z" fill="#1a1a3a" stroke="rgba(124,58,237,0.3)" stroke-width="1.5"/>
+
+  <!-- Collar / pauldron detail -->
+  <path d="M 168 340 Q 256 300 344 340" fill="none" stroke="rgba(167,139,250,0.2)" stroke-width="1"/>
+
+  <!-- Neck -->
+  <rect x="232" y="290" width="48" height="40" rx="8" fill="#1e1e42"/>
+
+  <!-- Head base -->
+  <ellipse cx="256" cy="240" rx="72" ry="82" fill="#1e1e42" stroke="rgba(124,58,237,0.25)" stroke-width="1.5"/>
+
+  <!-- Cyber line across crown -->
+  <path d="M 192 200 Q 256 186 320 200" fill="none" stroke="rgba(167,139,250,0.25)" stroke-width="1"/>
+
+  <!-- Face plate / visor area -->
+  <path d="M 200 220 Q 256 208 312 220 L 312 260 Q 256 274 200 260 Z" fill="#12123a" stroke="rgba(124,58,237,0.3)" stroke-width="1"/>
+
+  <!-- Visor glow bar -->
+  <rect x="205" y="225" width="102" height="4" rx="2" fill="url(#visorGrad)" filter="url(#glow)">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Visor second line -->
+  <rect x="215" y="235" width="82" height="3" rx="1.5" fill="url(#visorGrad)" opacity="0.5">
+    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="4s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Eyes: dual gleam points behind visor -->
+  <circle cx="238" cy="242" r="4" fill="#c084fc" filter="url(#softGlow)" opacity="0.9"/>
+  <circle cx="274" cy="242" r="4" fill="#c084fc" filter="url(#softGlow)" opacity="0.9"/>
+
+  <!-- Eye reflections (scanning effect) -->
+  <animateTransform attributeName="transform" type="translate" values="0,0;-6,0;0,0;6,0;0,0" dur="8s" repeatCount="indefinite"/>
+
+  <!-- === DATA STREAM ELEMENTS === -->
+
+  <!-- Data cascading lines (left side) -->
+  <g opacity="0.3">
+    <line x1="164" y1="150" x2="164" y2="200" stroke="#7c3aed" stroke-width="1" stroke-dasharray="3,6">
+      <animate attributeName="y2" values="150;200;150" dur="2s" repeatCount="indefinite"/>
+    </line>
+    <line x1="172" y1="140" x2="172" y2="190" stroke="#a78bfa" stroke-width="0.8" stroke-dasharray="2,5">
+      <animate attributeName="y2" values="140;190;140" dur="2.5s" repeatCount="indefinite"/>
+    </line>
+  </g>
+
+  <!-- Data cascading lines (right side) -->
+  <g opacity="0.3">
+    <line x1="340" y1="150" x2="340" y2="200" stroke="#7c3aed" stroke-width="1" stroke-dasharray="3,6">
+      <animate attributeName="y2" values="150;200;150" dur="2.3s" repeatCount="indefinite"/>
+    </line>
+    <line x1="348" y1="140" x2="348" y2="190" stroke="#a78bfa" stroke-width="0.8" stroke-dasharray="2,5">
+      <animate attributeName="y2" values="140;190;140" dur="2.8s" repeatCount="indefinite"/>
+    </line>
+  </g>
+
+  <!-- Scanning beam effect (horizontal sweep) -->
+  <rect x="170" y="256" width="172" height="2" rx="1" fill="#7c3aed" opacity="0.15" transform="translate(0, 0)">
+    <animate attributeName="opacity" values="0.15;0.4;0.15" dur="1.5s" repeatCount="indefinite"/>
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,40;0,0" dur="6s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- === SCAN FRAME / HUD BORDER === -->
+
+  <!-- Corner brackets -->
+  <g stroke="#7c3aed" stroke-width="1.5" fill="none" opacity="0.4">
+    <path d="M 120 120 L 120 100 L 140 100"/>
+    <path d="M 372 100 L 392 100 L 392 120"/>
+    <path d="M 392 392 L 392 412 L 372 412"/>
+    <path d="M 140 412 L 120 412 L 120 392"/>
+  </g>
+
+  <!-- Scan progress bar (bottom) -->
+  <rect x="140" y="400" width="232" height="2" rx="1" fill="rgba(124,58,237,0.1)"/>
+  <rect x="140" y="400" width="232" height="2" rx="1" fill="#a78bfa" opacity="0.4">
+    <animate attributeName="width" values="0;232;232;0" dur="4s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- === CENTER TEXT LABEL === -->
+
+  <text x="256" y="444" text-anchor="middle" font-family="monospace" font-size="10" fill="#a78bfa" opacity="0.5" letter-spacing="4">
+    AEGIS•AGENT
+    <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- STATS HUD LINES -->
+  <g font-family="monospace" font-size="7" fill="#7c3aed" opacity="0.3">
+    <text x="120" y="128">SCAN:ACTIVE</text>
+    <text x="355" y="128">RISK:WATCH</text>
+  </g>
+</svg>

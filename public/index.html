@@ -698,7 +698,7 @@
       return n.toLocaleString();
     }
 
-    fetch('/api/stats')
+    fetch('https://gregarious-nature-production-f3bb.up.railway.app/api/stats')
       .then(r => r.json())
       .then(data => {
         document.getElementById('stat-scans').textContent = formatNum(data.totalScans);

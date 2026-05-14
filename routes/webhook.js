@@ -58,14 +58,13 @@ async function handleCheckoutCompleted(bot, session) {
   const stripeCustomerId = session.customer;
   const stripeSubscriptionId = session.subscription;
 
-  // Retrieve the subscription to check trial status
   let status = 'active';
   let trialEndsAt = null;
 
   if (stripeSubscriptionId) {
     try {
       const subscription = await getStripe().subscriptions.retrieve(stripeSubscriptionId);
-      status = subscription.status; // 'trialing' or 'active'
+      status = subscription.status;
       if (subscription.trial_end) {
         trialEndsAt = new Date(subscription.trial_end * 1000).toISOString();
       }
@@ -85,15 +84,25 @@ async function handleCheckoutCompleted(bot, session) {
   });
 
   // Notify user via Telegram
-  const tierLabel = tier === 'pro' ? 'Pro' : 'Unlimited';
-  const trialMsg = trialEndsAt
-    ? `Your 7-day trial starts now. You won't be charged until ${new Date(trialEndsAt).toLocaleDateString()}.`
-    : '';
+  let message;
+  if (tier === 'abyssal_active') {
+    message =
+      '🌊 Welcome to Abyssal Active Defense!\n\n' +
+      'Your LP pools are now under active MEV protection. ' +
+      'We charge 17% commission only on verified value saved — ' +
+      'nothing if we don\'t stop an attack.\n\n' +
+      'Add a pool: `/abyssal watch 0x...`\n' +
+      'Check status: `/abyssal alerts`';
+  } else {
+    const tierLabel = tier === 'pro' ? 'Pro' : 'Unlimited';
+    const trialMsg = trialEndsAt
+      ? `Your 7-day trial starts now. You won't be charged until ${new Date(trialEndsAt).toLocaleDateString()}.`
+      : '';
+    message = `🎉 Welcome to ScamShield ${tierLabel}! ${trialMsg}\n\nUse /scan to start scanning. Use /usage to check your balance.`;
+  }
 
   try {
-    await bot.sendMessage(Number(telegramUserId),
-      `🎉 Welcome to ScamShield ${tierLabel}! ${trialMsg}\n\nUse /scan to start scanning. Use /usage to check your balance.`
-    );
+    await bot.sendMessage(Number(telegramUserId), message, { parse_mode: 'Markdown' });
   } catch (err) {
     console.error('Failed to send checkout confirmation to user:', err.message);
   }
