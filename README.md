@@ -1,215 +1,259 @@
 # ScamShield Telegram Bot
 
-AI-powered Telegram bot for detecting crypto and investment scams. Uses Claude Sonnet for risk analysis, VirusTotal for URL reputation, and pattern matching for fast detection.
+AI-powered Telegram bot for detecting crypto and investment scams. Combines Claude Sonnet for deep analysis, VirusTotal for URL reputation, blockchain security APIs, and pattern matching for fast, layered detection.
+
+---
+
+## What Is ScamShield?
+
+ScamShield is a security-first Telegram bot that helps users identify crypto scams, phishing links, honeypot tokens, rug pulls, and social engineering attacks in real time. It is designed for:
+
+- Individual crypto users who need fast on-demand risk checks
+- Community admins who want automated threat monitoring
+- Pro and Unlimited subscribers who get daily Portfolio Shield alerts and advanced features
+- Abyssal MEV Defense subscribers who protect DeFi positions from sandwich attacks and drain attempts
+
+ScamShield does not require a wallet signature or private key access for any scan — all scanning is read-only.
+
+---
 
 ## Commands
 
+### Core Scan Commands
+
 | Command | Description |
 |---------|-------------|
-| `/scan [text/url]` | Analyze content for scam indicators (risk score 1-10) |
-| `/report [description]` | Submit a suspected scam to the community database |
-| `/apikey` | Generate an API key (also: `/apikey list`, `/apikey test`) |
-| `/usage` | View API usage and billing for current month |
-| `/status` | Bot uptime and statistics |
-| `/premium` | View premium features |
-| `/help` | Command list |
+| `/scan [text or URL]` | Analyze content for scam indicators — returns a risk score (1–10) with confidence and reasoning |
+| `/contract <address> [chain]` | Deep-scan a token contract for honeypot mechanics, ownership issues, and on-chain red flags |
+| `/report [description]` | Submit a suspected scam to the community database to help train detection |
+| `/learn` | Return similar known scams for a piece of content (semantic search) |
 
-## Setup
+### Portfolio Shield
 
-### 1. Prerequisites
+| Command | Description |
+|---------|-------------|
+| `/portfolio <address> [chain]` | One-shot scan of a wallet's holdings for honeypots, rugs, and drainers |
+| `/portfolio watch <address> [chain]` | Subscribe to daily DM alerts if any holding crosses Critical risk (Pro/Unlimited) |
+| `/portfolio list` | List your watched wallets |
+| `/portfolio remove <address>` | Stop watching a wallet |
 
-- Node.js 18+
-- Telegram bot token (from [@BotFather](https://t.me/BotFather))
-- Anthropic API key
-- Supabase project
-- VirusTotal API key (free tier works)
+Supported chains: `eth`, `bsc`, `polygon`, `arb`, `base`, `op`, `avax`, `sol`.
 
-### 2. Install Dependencies
+### Account & Billing
+
+| Command | Description |
+|---------|-------------|
+| `/upgrade` | View Pro and Unlimited subscription plans (powered by Stripe) |
+| `/manage` | Manage your active subscription — upgrade, downgrade, or cancel |
+| `/apikey` | Generate an API key for the HTTP scan API |
+| `/apikey list` | List your API keys |
+| `/apikey test` | Verify an API key is active |
+| `/usage` | View your API usage and billing for the current month |
+
+### Abyssal MEV Defense
+
+| Command | Description |
+|---------|-------------|
+| `/abyssal` | Activate Abyssal tier — real-time MEV intercept and DeFi pool protection |
+
+Abyssal is a commission-only tier ($0/month). ScamShield takes 17% of verified value saved from intercepted attacks.
+
+### Invite & Referrals
+
+| Command | Description |
+|---------|-------------|
+| `/invite` | Generate a referral link — earn bonus scans for each signup |
+
+### Privacy & Data
+
+| Command | Description |
+|---------|-------------|
+| `/security` | View ScamShield's security posture and how your data is handled |
+| `/privacy` | View the privacy policy |
+| `/optout` | Opt out of anonymous analytics |
+| `/delete` | Permanently delete all your data (GDPR compliant) |
+
+### Utility
+
+| Command | Description |
+|---------|-------------|
+| `/start` | Onboarding message and quick start |
+| `/help` | Full command reference |
+| `/ping` | Check bot latency and status |
+| `/status` | Bot uptime, scan stats, and system health |
+
+---
+
+## Environment Variables
+
+Set these in your `.env` file or Railway environment variables.
+
+### Required
+
+| Variable | Description |
+|----------|-------------|
+| `TELEGRAM_BOT_TOKEN` | Bot token from @BotFather |
+| `ANTHROPIC_API_KEY` | Claude Sonnet API key for AI-powered scan analysis |
+| `SUPABASE_URL` | Your Supabase project URL |
+| `SUPABASE_KEY` | Supabase service role key |
+| `STRIPE_SECRET_KEY` | Stripe secret key for billing |
+
+### Billing — Stripe Price IDs
+
+| Variable | Description |
+|----------|-------------|
+| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret from the Stripe dashboard |
+| `STRIPE_PRO_PRICE_ID` | Stripe Price ID for the Pro plan |
+| `STRIPE_UNLIMITED_PRICE_ID` | Stripe Price ID for the Unlimited plan |
+| `STRIPE_ABYSSAL_ACTIVE_PRICE_ID` | Stripe Price ID for Abyssal Active (commission-only, $0/mo) |
+
+### Optional — Expand Scan Coverage
+
+| Variable | Description |
+|----------|-------------|
+| `VIRUSTOTAL_API_KEY` | VirusTotal API key for URL reputation checks (free tier works) |
+| `ALCHEMY_API_KEY` | Alchemy API key for Portfolio Shield on-chain token scanning |
+| `WALLET_HASH_SECRET` | Secret for HMAC-hashing watched wallet addresses (required for Portfolio Shield watch lists) |
+
+### Bot Mode
+
+| Variable | Description |
+|----------|-------------|
+| `BOT_MODE` | `polling` (default, for local dev) or `webhook` (for Railway/production) |
+| `PORT` | Express server port (default `3000`) |
+| `WEBHOOK_URL` | Public HTTPS URL of your deployment, required when `BOT_MODE=webhook` |
+
+### Threat-Intel Integration
+
+| Variable | Description |
+|----------|-------------|
+| `THREAT_INTEL_URL` | Supabase URL for the shared threat-intel project |
+| `THREAT_INTEL_SERVICE_KEY` | Service role key for the threat-intel project |
+| `THREAT_INTEL_RISK_THRESHOLD` | Risk score (1–10) at which scans are forwarded to threat-intel (default `7`) |
+| `INTERCEPT_USER_HASH_SALT` | Optional salt for SHA-256 user ID hashing before logging to threat-intel |
+
+### Internal API
+
+| Variable | Description |
+|----------|-------------|
+| `INTERNAL_SCAN_SECRET` | Shared secret for `/internal/scan`, used by the Discord bot and Flutter backend |
+
+---
+
+## Development Setup
 
 ```bash
+# 1. Clone and install
 cd scamshield-bot
 npm install
-```
 
-### 3. Environment Variables
-
-```bash
+# 2. Configure environment
 cp .env.example .env
+# Edit .env — at minimum set:
+#   TELEGRAM_BOT_TOKEN, ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_KEY, STRIPE_SECRET_KEY
+
+# 3. Apply database migrations (see MIGRATIONS.md)
+# Run each SQL file in order via the Supabase SQL Editor
+
+# 4. Start in polling mode
+npm start
 ```
 
-Fill in your `.env`:
+Health check: `http://localhost:3000/health`
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `TELEGRAM_BOT_TOKEN` | Yes | From BotFather |
-| `ANTHROPIC_API_KEY` | Yes | Claude API key |
-| `SUPABASE_URL` | Yes | Supabase project URL |
-| `SUPABASE_KEY` | Yes | Supabase service role key |
-| `VIRUSTOTAL_API_KEY` | No | VirusTotal API key (URL scanning) |
-| `BOT_MODE` | No | `polling` (default) or `webhook` |
-| `WEBHOOK_URL` | No | Required for webhook mode |
-| `PORT` | No | Express port (default: 3000) |
+---
 
-### 4. Database Setup
+## Deployment to Railway
 
-Run both migrations in your Supabase SQL Editor:
+ScamShield is configured for Railway deployment via `railway.toml` (Nixpacks build, `node bot.js` start command, `/health` health check, restart on failure up to 5 times).
 
-- `migrations/001_initial_schema.sql` — scam_reports, scam_signatures, user_submissions
-- `migrations/002_api_keys_and_usage.sql` — api_keys, api_scans, api_usage_monthly
+1. Push the repo to GitHub.
+2. Create a Railway project and connect the GitHub repo.
+3. Add all required environment variables in the Railway dashboard.
+4. Set `BOT_MODE=webhook` and `WEBHOOK_URL=https://<your-app>.up.railway.app`.
+5. Deploy. The bot sets and verifies its own Telegram webhook on startup.
 
-### 5. Run Locally
+---
 
-```bash
-npm run dev
-```
+## Database Migrations
 
-The bot starts in polling mode by default. Open Telegram and send `/help` to your bot.
+See [MIGRATIONS.md](./MIGRATIONS.md) for the complete guide.
 
-## Deploy to Railway
+**Short version:**
 
-### Option A: Script
+1. Apply `migrations/001` through `migrations/007` on your main Supabase project (core schema).
+2. Apply `db/migrations/002` through `db/migrations/006` on the same project (feature extensions).
+3. Apply `db/migrations/007_protected_pools.sql` on the **threat-intel Supabase project** only.
 
-```bash
-chmod +x deploy.sh
-./deploy.sh
-```
+---
 
-### Option B: Manual
+## Portfolio Shield
 
-1. Install Railway CLI: `npm install -g @railway/cli`
-2. Login: `railway login`
-3. Create project: `railway init`
-4. Set env vars: `railway variables set KEY=value`
-5. Set `BOT_MODE=webhook` and `WEBHOOK_URL=https://your-app.up.railway.app`
-6. Deploy: `railway up`
+Portfolio Shield scans a wallet's on-chain token holdings for:
 
-## API Access (for Developers)
+- Honeypot tokens (blocked sell transactions)
+- Rug pull mechanics (unrenounced ownership, hidden minting)
+- Known drainer contracts
+- High-risk liquidity patterns
 
-ScamShield exposes a REST API for third-party integrations. Users generate API keys via the `/apikey` Telegram command.
+**Privacy design:** Wallet addresses in watch lists are stored as HMAC-SHA-256 hashes (`WALLET_HASH_SECRET`). Raw addresses are never persisted to the database. A database breach does not reveal which wallets are being monitored.
 
-### Authentication
+**Background scheduler:** Runs every 60 minutes. If a watched wallet's most recent scan (from a user-triggered `/portfolio` command) shows Critical-risk holdings, the user receives a DM alert. Operates in log-only degraded mode when `ALCHEMY_API_KEY` is not configured.
 
-Pass your API key via either header:
+---
 
-```
-Authorization: Bearer sg_live_abc123...
-X-API-Key: sg_live_abc123...
-```
+## Abyssal MEV Defense
 
-### POST /api/scan
+Abyssal is the top tier for active DeFi participants:
 
-Analyze content for scam indicators.
+- Real-time mempool monitoring for sandwich attacks on your pool positions
+- Automatic intercept transactions to front-run drain attempts
+- Commission-based billing: 17% of verified value saved, tracked in `commission_transactions`
+- Protected pool addresses stored in the threat-intel Supabase project (`protected_pools` table)
+- Activate with `/abyssal`
 
-**Request:**
+---
 
-```bash
-curl -X POST https://your-app.up.railway.app/api/scan \
-  -H "Authorization: Bearer sg_live_YOUR_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"content": "Double your BTC! Send 0.1 ETH to 0xABC and get 1 ETH back!"}'
-```
+## HTTP API
 
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "risk_score": 9,
-    "confidence": 92,
-    "indicators": ["guaranteed returns", "send crypto to", "double your money"],
-    "reasoning": "Classic crypto doubling scam pattern...",
-    "advice": "Do not send any funds. This is almost certainly a scam.",
-    "content_type": "text",
-    "virus_total": null,
-    "analysis_source": "full_analysis",
-    "response_time_ms": 2340
-  },
-  "usage": {
-    "scans_used": 42,
-    "scans_remaining": 58,
-    "overage_cost": 0,
-    "billing_status": "free"
-  }
-}
-```
-
-**Response Headers:**
-
-| Header | Description |
-|--------|-------------|
-| `X-Scans-Used` | Total scans this month |
-| `X-Scans-Remaining` | Free tier scans remaining |
-| `X-Billing-Status` | `free` or `overage` |
-| `X-Test-Mode` | Present if using a test key |
-
-### GET /api/usage
-
-Check your current month's usage and billing.
-
-```bash
-curl https://your-app.up.railway.app/api/usage \
-  -H "Authorization: Bearer sg_live_YOUR_KEY"
-```
-
-### Pricing
-
-| Tier | Scans | Cost |
-|------|-------|------|
-| Free | 100/month | $0 |
-| Overage | Each scan after 100 | $0.05/scan |
-| Unlimited | Unlimited | $28/mo |
-
-### Key Types
-
-| Prefix | Type | Description |
-|--------|------|-------------|
-| `sg_live_` | Live | Production use, counts toward billing |
-| `sg_test_` | Test | Testing, flagged with `X-Test-Mode` header |
-
-### Error Responses
-
-```json
-{"error": "Missing API key. Provide via Authorization: Bearer <key> or X-API-Key header."}  // 401
-{"error": "Invalid or revoked API key."}  // 401
-{"error": "Missing required field: content (string)"}  // 400
-{"error": "Content exceeds 4000 character limit."}  // 400
-```
-
-## Architecture
+Pro and Unlimited subscribers can call the scan API programmatically.
 
 ```
-bot.js                    Entry point (Telegram + Express + API)
-├── routes/
-│   └── api.js            POST /api/scan, GET /api/usage
-├── commands/
-│   ├── scan.js           /scan — full analysis pipeline
-│   ├── report.js         /report — community submissions
-│   ├── apikey.js         /apikey — generate/list API keys
-│   ├── usage.js          /usage — view usage & billing
-│   ├── status.js         /status — stats from DB
-│   ├── help.js           /help & /start
-│   └── premium.js        /premium — upgrade prompt
-├── scamDetector.js       Multi-stage detection engine
-├── apiKeySystem.js       Key generation (sg_live_/sg_test_), SHA-256 hashing
-├── usageTracking.js      Batch scan logging (flush every 60s)
-├── metering.js           Monthly usage tracking & overage billing
-├── database.js           Supabase queries
-└── utils/
-    ├── urlExtractor.js   URL parsing & VT encoding
-    └── formatter.js      Telegram MarkdownV2 formatting
+POST /api/scan
+Authorization: Bearer <api_key>
+Content-Type: application/json
+
+{ "content": "text or URL to scan" }
 ```
 
-## Detection Pipeline
+Generate keys with `/apikey`. View usage with `/usage`. The internal endpoint `/internal/scan` uses `INTERNAL_SCAN_SECRET` for machine-to-machine calls (Discord bot, Flutter backend).
 
-1. **Parse input** — extract URLs, determine content type
-2. **VirusTotal** — check URL reputation (4 req/min rate limit)
-3. **Keyword analysis** — weighted pattern matching (high/medium/low severity)
-4. **Claude Sonnet** — AI analysis returning structured risk assessment
-5. **Score aggregation** — Claude 60% + VT 25% + Keywords 15%
+---
 
-If any stage fails, the bot gracefully degrades and returns partial results.
+## Dependency Freeze Policy
+
+- Lock files (`package-lock.json`) are committed on first install and tracked in version control.
+- Unexpected lock file changes are treated as a build failure signal.
+- `npm install --latest` and unsolicited dependency upgrades require explicit operator approval before merging.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Bot framework | `node-telegram-bot-api` |
+| AI analysis | `@anthropic-ai/sdk` (Claude Sonnet) |
+| Database | Supabase (PostgreSQL + RLS) |
+| Billing | Stripe |
+| Web server | Express |
+| Blockchain data | Alchemy API (EVM + Solana) |
+| URL reputation | VirusTotal API |
+| Runtime | Node.js 18+ |
+| Deployment | Railway |
+
+---
 
 ## License
 
-MIT
+Proprietary. All rights reserved.

@@ -78,6 +78,11 @@ registerAbyssal(bot);
 const aegis = require('./aegisAgent');
 aegis.init();
 
+// --- Start Portfolio Shield daily alert scheduler ---
+
+const { startPortfolioScheduler } = require('./utils/portfolioScheduler');
+const portfolioScheduler = startPortfolioScheduler(bot);
+
 // --- Start usage tracking batch flush ---
 
 const { startBatchFlush, flushBuffer } = require('./usageTracking');
@@ -165,6 +170,7 @@ process.on('SIGTERM', async () => {
   console.log('SIGTERM received, shutting down...');
   await flushBuffer();
   aegis.shutdown();
+  portfolioScheduler.stop();
   bot.stopPolling();
   process.exit(0);
 });
