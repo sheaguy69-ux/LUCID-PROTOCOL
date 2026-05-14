@@ -13,6 +13,8 @@
 const { createClient } = require('@supabase/supabase-js');
 const VALID_EVM_ADDR = /^0x[a-fA-F0-9]{40}$/;
 const { createCheckoutSession, getSubscriberTier } = require('../billing');
+const { getCommissionBalance, getCommissionHistory } = require('../utils/commissionEngine');
+const { createMempoolDetector } = require('../utils/mempoolDetector');
 
 // --- Lazy threat-intel supabase client (like intelClient.js) ----------
 
@@ -39,6 +41,13 @@ function getThreatIntelClient() {
   return threatIntelClient;
 }
 
+// --- Helpers ---
+
+function weiToEth(wei) {
+  if (!wei || wei === '0') return '0.000000';
+  return (Number(wei) / 1e18).toFixed(6);
+}
+
 // --- Formatters (pure functions, testable) ---
 
 function formatLanding() {
@@ -63,6 +72,7 @@ function formatLanding() {
     '*Commands:*',
     '`/abyssal pools` — list your protected pools',
     '`/abyssal watch <address>` — queue a pool for monitoring',
+    '`/abyssal monitor` — start/check mempool monitoring status',
     '`/abyssal alerts` — check your alert status & tier',
     '`/abyssal stats` — aggregate protection stats',
     '`/abyssal upgrade` — upgrade to Active Defense',
@@ -191,6 +201,8 @@ const RE_POOLS     = /^\/abyssal(?:@\w+)?\s+pools$/;
 const RE_ALERTS    = /^\/abyssal(?:@\w+)?\s+alerts$/;
 const RE_STATS     = /^\/abyssal(?:@\w+)?\s+stats$/;
 const RE_UPGRADE   = /^\/abyssal(?:@\w+)?\s+upgrade$/;
+const RE_SAVED     = /^\/abyssal(?:@\w+)?\s+saved$/;
+const RE_MONITOR   = /^\/abyssal(?:@\w+)?\s+monitor$/;
 const RE_WATCH     = /^\/abyssal(?:@\w+)?\s+watch\s+(.+)$/i;
 const RE_CATCHALL  = /^\/abyssal(?:@\w+)?\s+(.+)$/;
 
@@ -229,7 +241,7 @@ module.exports = function registerAbyssal(bot) {
     }
   });
 
-  // --- /abyssal alerts ---
+  // --- /abyssal alerts — improved: shows live detector status, recent events, balance ---
   bot.onText(RE_ALERTS, async (msg) => {
     const userId = msg.from.id;
     const sub = await getSubscriberTier(userId);
@@ -237,7 +249,7 @@ module.exports = function registerAbyssal(bot) {
     if (sub.tier === 'abyssal_active') abyssalTier = 'active';
     else if (sub.tier && sub.tier !== 'none') abyssalTier = 'free';
 
-    // Fetch pool count for the message
+    // Fetch pool count
     let poolCount = 0;
     const c = getThreatIntelClient();
     if (c) {
@@ -250,7 +262,85 @@ module.exports = function registerAbyssal(bot) {
       } catch (_) { /* non-blocking */ }
     }
 
-    bot.sendMessage(msg.chat.id, formatAlerts(abyssalTier, poolCount), { parse_mode: 'Markdown' });
+    // Get detector status
+    const detector = createMempoolDetector();
+    const detStatus = detector.getStatus();
+
+    // Get recent commission history
+    const [balance, history] = await Promise.all([
+      getCommissionBalance(userId),
+      getCommissionHistory(userId, 10),
+    ]);
+
+    const monitorStatus = detStatus.running ? 'Active' : 'Off';
+    const lines = [
+      '🚨 *Defense Alerts*',
+      '',
+      `Monitor: *${monitorStatus}*`,
+      `Attacks detected: ${detStatus.detectionCount}`,
+      `Pools watched: ${detStatus.watchedPoolsCount}`,
+      '',
+    ];
+
+    if (history.length > 0) {
+      lines.push('*Recent events:*');
+      for (const tx of history) {
+        const statusEmoji = tx.status === 'paid' ? '✅' : tx.status === 'invoiced' ? '📋' : '📌';
+        lines.push(`${tx.date} | \`${tx.shortPool}\` | ${tx.attackType} | ${statusEmoji}`);
+      }
+      lines.push('');
+    }
+
+    lines.push(`*Balance:* ${weiToEth(balance.pending.totalWei)} ETH pending commission`);
+
+    if (poolCount === 0) {
+      lines.push('', '_No pools being watched. Add one with /abyssal watch 0x..._');
+    }
+
+    bot.sendMessage(msg.chat.id, lines.join('\n'), { parse_mode: 'Markdown' });
+  });
+
+  // --- /abyssal monitor ---
+  bot.onText(RE_MONITOR, async (msg) => {
+    const detector = createMempoolDetector();
+    const isRunning = detector.running;
+
+    if (!isRunning) {
+      detector.start();
+      // Give it a moment to do the initial refresh
+      await new Promise((r) => setTimeout(r, 500));
+    }
+
+    const status = detector.getStatus();
+    const intervalSec = Math.round(status.intervalMs / 1000);
+
+    // Check if user has any pools
+    const c = getThreatIntelClient();
+    let userPoolCount = 0;
+    if (c) {
+      try {
+        const { count, error } = await c
+          .from('protected_pools')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', String(msg.from.id));
+        if (!error) userPoolCount = count || 0;
+      } catch (_) { /* non-blocking */ }
+    }
+
+    const lines = [
+      '📡 *Mempool Monitor*',
+      '',
+      `Status: ${status.running ? 'Active' : 'Stopped'}`,
+      `Pools watched: ${status.watchedPoolsCount}`,
+      `Attacks detected: ${status.detectionCount}`,
+      `Poll interval: ${intervalSec}s`,
+    ];
+
+    if (userPoolCount === 0) {
+      lines.push('', 'No pools being watched. Add one with `/abyssal watch 0x...`');
+    }
+
+    bot.sendMessage(msg.chat.id, lines.join('\n'), { parse_mode: 'Markdown' });
   });
 
   // --- /abyssal stats ---
@@ -340,6 +430,57 @@ module.exports = function registerAbyssal(bot) {
         'Failed to create checkout. Please make sure `STRIPE_ABYSSAL_ACTIVE_PRICE_ID` is set and try again.',
       );
     }
+  });
+
+  // --- /abyssal saved ---
+  bot.onText(RE_SAVED, async (msg) => {
+    const userId = msg.from.id;
+    const sub = await getSubscriberTier(userId);
+
+    if (sub.tier !== 'abyssal_active') {
+      return bot.sendMessage(
+        msg.chat.id,
+        '🆓 *Abyssal — Commission Balance*\n\n' +
+        'You\'re on the free tier — no value-saved events recorded.\n\n' +
+        'Upgrade to *Active Defense* to start saving value on your LP pools.\n' +
+        '`/abyssal upgrade`',
+        { parse_mode: 'Markdown' }
+      );
+    }
+
+    const [balance, history] = await Promise.all([
+      getCommissionBalance(userId),
+      getCommissionHistory(userId, 5),
+    ]);
+
+    // Format balance section
+    const lines = [
+      '💰 *Abyssal — Commission Balance*',
+      '',
+      `📌 Pending:   ${balance.pending.count} events, ${weiToEth(balance.pending.totalWei)} ETH`,
+      `📋 Invoiced:  ${balance.invoiced.count} events, ${weiToEth(balance.invoiced.totalWei)} ETH`,
+      `✅ Paid:      ${balance.paid.count} events, ${weiToEth(balance.paid.totalWei)} ETH`,
+      `📊 All-time:  ${balance.totalAllTime.count} events, ${weiToEth(balance.totalAllTime.totalWei)} ETH`,
+    ];
+
+    if (history.length === 0) {
+      lines.push(
+        '',
+        '_No defense events yet. Add a pool to start monitoring:_',
+        '`/abyssal watch 0x...`',
+      );
+    } else {
+      lines.push('', '━━━ *Recent Events* ━━━', '');
+      for (const tx of history) {
+        const statusEmoji = tx.status === 'paid' ? '✅' : tx.status === 'invoiced' ? '📋' : '📌';
+        lines.push(
+          `${statusEmoji} ${tx.date} | \`${tx.shortPool}\` | ` +
+          `Saved: ${tx.valueSavedEth} ETH | Comm: ${tx.commissionEth} ETH | ${tx.status}`
+        );
+      }
+    }
+
+    bot.sendMessage(msg.chat.id, lines.join('\n'), { parse_mode: 'Markdown' });
   });
 
   // --- /abyssal watch <address> ---
