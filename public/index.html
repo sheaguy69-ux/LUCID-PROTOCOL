@@ -358,6 +358,145 @@
       line-height: 1.5;
     }
 
+    /* --- Abyssal Section --- */
+    .abyssal {
+      padding: 60px 0;
+    }
+
+    .abyssal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      color: #60a5fa;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .abyssal h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .abyssal .subtitle {
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    .abyssal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 700px;
+      margin: 0 auto 40px;
+    }
+
+    .abyssal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .abyssal-card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-4px);
+    }
+
+    .abyssal-card.featured {
+      border-color: #3b82f6;
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.15);
+    }
+
+    .abyssal-card .tier-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .abyssal-card .tier-big {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .abyssal-card .commission {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #60a5fa;
+      margin-bottom: 12px;
+    }
+
+    .abyssal-card ul {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .abyssal-card li {
+      padding: 6px 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .abyssal-card li::before {
+      content: "\2713";
+      color: #60a5fa;
+      margin-right: 8px;
+      font-weight: 700;
+    }
+
+    .abyssal-stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    .abyssal-stat {
+      text-align: center;
+      padding: 20px 28px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      min-width: 120px;
+    }
+
+    .abyssal-stat .val {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #60a5fa;
+      display: block;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .abyssal-stat .lbl {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 640px) {
+      .abyssal-grid { grid-template-columns: 1fr; }
+    }
+
     /* --- Aegis Section --- */
     .aegis {
       padding: 60px 0;
@@ -539,6 +678,7 @@
       <div class="brand">ScamShield</div>
       <div class="nav-links">
         <a href="#features">Features</a>
+        <a href="#abyssal">Abyssal</a>
         <a href="#aegis">Aegis</a>
         <a href="#pricing">Pricing</a>
         <a href="/api/scan" target="_blank">API</a>
@@ -628,6 +768,58 @@
           <div class="feature-icon">⚡</div>
           <h3>Instant Results</h3>
           <p>Risk score from 1-10 with detailed reasoning, indicators, and actionable advice in seconds.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Abyssal -->
+    <section class="abyssal" id="abyssal" style="padding:60px 0;text-align:center">
+      <div class="abyssal-badge">MEV Defense</div>
+      <h2>Abyssal — Liquidity Protection</h2>
+      <p class="subtitle">
+        Real-time MEV attack detection for liquidity providers. Protect your pools from sandwiches, JIT liquidity, and front-running. Commission-based — only pay when we save you money.
+      </p>
+
+      <div class="abyssal-grid">
+        <div class="abyssal-card">
+          <div class="tier-label">Alert Only</div>
+          <div class="tier-big">Free with ScamShield<br>active subscription</div>
+          <ul>
+            <li>Real-time swap monitoring</li>
+            <li>MEV pattern detection</li>
+            <li>Telegram alerts on attacks</li>
+            <li>Up to 3 protected pools</li>
+            <li>Attack history dashboard</li>
+          </ul>
+          <a href="https://t.me/SGbutta_bot" class="btn btn-secondary" style="display:block;text-align:center;">Start Monitoring</a>
+        </div>
+        <div class="abyssal-card featured">
+          <div class="tier-label">Active Defense</div>
+          <div class="commission">17%</div>
+          <div class="tier-big">commission on value saved<br>no monthly fee</div>
+          <ul>
+            <li>Everything in Alert Only</li>
+            <li>Auto-defense against attacks</li>
+            <li>Unlimited protected pools</li>
+            <li>17% commission on saved value</li>
+            <li>Commission dashboard + history</li>
+          </ul>
+          <a href="https://t.me/SGbutta_bot" class="btn btn-primary" style="display:block;text-align:center;">Enable Active Defense</a>
+        </div>
+      </div>
+
+      <div class="abyssal-stats">
+        <div class="abyssal-stat">
+          <span class="val">MEV</span>
+          <span class="lbl">Sandwich / JIT / Front-Run</span>
+        </div>
+        <div class="abyssal-stat">
+          <span class="val">7</span>
+          <span class="lbl">Chains Supported</span>
+        </div>
+        <div class="abyssal-stat">
+          <span class="val">17%</span>
+          <span class="lbl">Commission Rate</span>
         </div>
       </div>
     </section>
