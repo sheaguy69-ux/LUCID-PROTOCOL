@@ -88,7 +88,7 @@ async function handleCheckoutCompleted(bot, session) {
   if (tier === 'abyssal_active') {
     message =
       '🌊 Welcome to Abyssal Active Defense!\n\n' +
-      'Your LP pools are now under active MEV protection. ' +
+      'Your LP pools are now under active on-chain protection. ' +
       'We charge 17% commission only on verified value saved — ' +
       'nothing if we don\'t stop an attack.\n\n' +
       'Add a pool: `/abyssal watch 0x...`\n' +

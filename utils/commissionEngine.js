@@ -28,7 +28,7 @@ const COMMISSION_DENOMINATOR = 100n;
  * @param {string} opts.poolAddress          — EVM pool address
  * @param {string} opts.valueSavedWei        — raw wei value saved (decimal string)
  * @param {string} [opts.transactionHash]    — on-chain TX hash, if available
- * @param {string} [opts.attackType]         — 'sandwich'|'jit_liquidity'|'frontrun'|'backrun'|'unknown'
+ * @param {string} [opts.attackType]         — Type of activity detected: 'suspicious_tx' or 'unknown'
  * @returns {Promise<Object|null>} { id, commissionWei, valueSavedWei, rate } or null if skipped
  */
 async function recordSaveEvent({ telegramUserId, poolAddress, valueSavedWei, transactionHash, attackType }) {

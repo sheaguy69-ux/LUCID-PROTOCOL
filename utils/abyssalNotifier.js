@@ -1,5 +1,5 @@
 /**
- * abyssalNotifier.js — Telegram alert dispatch for Abyssal MEV defense events.
+ * abyssalNotifier.js — Telegram alert dispatch for Abyssal on-chain pool protection events.
  *
  * Never throws. Every send is wrapped with .catch(() => {}).
  *
@@ -32,7 +32,7 @@ function ethscanTxLink(txHash) {
  * @param {Object} bot - Telegram bot instance
  * @param {number|string} telegramUserId - Telegram user ID (string or number)
  * @param {Object} attack - attack object from mempoolDetector
- * @param {string} attack.type - 'sandwich'|'jit_liquidity'|'frontrun'|'backrun'
+ * @param {string} attack.type - Currently 'suspicious_tx' — expand as detection matures
  * @param {number} attack.confidence - 0-100 confidence score
  * @param {string} attack.estimatedValueAtRisk - wei string
  * @param {string} attack.txHash - transaction hash
@@ -44,7 +44,7 @@ async function sendAttackDetected(bot, telegramUserId, attack) {
   const typeLabel = attack.type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
   const text = [
-    '🚨 *MEV Attack Detected*',
+    '🚨 *Suspicious Activity Detected*',
     '',
     `Pool: \`${shortAddr(poolAddr)}\``,
     `Type: ${typeLabel}`,
@@ -84,7 +84,7 @@ async function sendDefenseResult(bot, telegramUserId, result) {
       `Commission earned: ${commEth} ETH (17%)`,
     ].join('\n');
   } else {
-    const typeLabel = (result.type || 'mev attack').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const typeLabel = (result.type || 'suspicious activity').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     text = [
       '⚠️ *Attack Detected — Alert Only*',
       '',

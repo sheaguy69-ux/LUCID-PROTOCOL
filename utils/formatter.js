@@ -311,7 +311,7 @@ function formatHelp() {
     `/usage — View your usage \\& subscription`,
     `/status — Bot status \\& statistics`,
     `/help — Show this message`,
-    `/abyssal — MEV defense for LP pools (commission\\-based)`,
+    `/abyssal — On\-chain pool protection (commission\\-based)`,
     `/learn \[pattern\] — Submit a scam pattern to train the detector`,
     `/invite \[username\] — Refer a friend and earn bonus scans`,
     `/portfolio \[address\] — Track wallet risk with Portfolio Shield`,

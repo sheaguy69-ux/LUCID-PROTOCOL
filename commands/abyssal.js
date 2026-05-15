@@ -1,5 +1,5 @@
 /**
- * /abyssal — Abyssal MEV defense deep layer command
+ * /abyssal — On-chain pool protection command
  *
  * Subcommands:
  *   /abyssal                    — overview / landing
@@ -52,19 +52,19 @@ function weiToEth(wei) {
 
 function formatLanding() {
   return [
-    '🌊 *Abyssal — Guard the Deep*',
+    '🌊 *Abyssal — On-Chain Pool Protection*',
     '',
-    'Active MEV defense for your liquidity pools.',
+    'Liquidity-pool monitoring and scam detection for your DeFi holdings.',
     'ScamShield protects what you _see_. Abyssal protects what you _hold_.',
     '',
-    '*Defense types:*',
-    '🔹 Sandwich attack blocking',
-    '🔹 JIT liquidity detection & counter',
-    '🔹 Front-run & back-run prevention',
-    '🔹 Private mempool routing',
+    '*Protection features:*',
+    '🔹 Real-time mempool monitoring for suspicious activity',
+    '🔹 Detect honeypot deployments targeting your pools',
+    '🔹 Alert on abnormal swap patterns & liquidity drains',
+    '🔹 Track known scam addresses interacting with your pools',
     '',
     '*Pricing:*',
-    '🆓 *Free tier* — monitor 1 pool, real-time alerts, no active defense',
+    '🆓 *Free tier* — monitor 1 pool, real-time alerts, manual check',
     '⚡ *Active Defense* — unlimited pools, auto counter-measures,',
     '   17% commission on *verified value saved only*',
     '   (no-save, no-pay guarantee)',
@@ -355,12 +355,12 @@ module.exports = function registerAbyssal(bot) {
     const text = [
       '🌊 *Abyssal Active Defense*',
       '',
-      'You\'re about to activate real-time MEV protection for your LP pools.',
+      'You\'re about to activate real-time on-chain protection for your LP pools.',
       '',
       '*What you get:*',
       '🔹 Unlimited protected pools',
-      '🔹 Auto counter-measures (Flashbots bundles)',
-      '🔹 Private mempool routing',
+      '🔹 Auto counter-measures against suspicious activity',
+      '🔹 Priority monitoring on scam deployments',
       '🔹 Real-time value-saved dashboard (coming soon)',
       '',
       '*Pricing:*',

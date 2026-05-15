@@ -1,8 +1,8 @@
 /**
  * mempoolDetector.js — Mempool Simulator + Detection Engine for Abyssal
  *
- * Polls Alchemy RPC for recent block activity on user's protected pools.
- * Detects MEV attack patterns: sandwich, JIT liquidity, front-run, back-run.
+ * Polls Alchemy RPC for suspicious on-chain activity targeting protected pools.
+ * Detects abnormal swap patterns, honeypot deployments, and scam interactions.
  * Records save events through commissionEngine for active defense subscribers.
  *
  * Public API:
