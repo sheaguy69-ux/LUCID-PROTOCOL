@@ -15,7 +15,7 @@ function msUntilNextRun(hour = 9, minute = 0) {
 }
 
 function scheduleDaily() {
-  const delay = msUntilNextRun(9, 0);
+  const delay = msUntilNextRun(12, 45);
   const nextRun = new Date(Date.now() + delay);
   console.log(`[content-scheduler] Next run: ${nextRun.toLocaleString()}`);
 
