@@ -50,6 +50,8 @@ const registerOptout = require('./commands/optout');
 const registerDelete = require('./commands/delete');
 const registerPortfolio = require('./commands/portfolio');
 const registerAbyssal = require('./commands/abyssal');
+const registerStars = require('./commands/stars');
+const { sendStarsInvoice, handlePreCheckoutQuery, handleSuccessfulPayment } = require('./starsPayment');
 
 registerStart(bot);
 registerPing(bot);
@@ -72,6 +74,12 @@ registerOptout(bot);
 registerDelete(bot);
 registerPortfolio(bot);
 registerAbyssal(bot);
+registerStars(bot);
+
+// --- Register Stars payment handlers ---
+
+bot.on('pre_checkout_query', (query) => handlePreCheckoutQuery(bot, query));
+bot.on('successful_payment', (msg) => handleSuccessfulPayment(bot, msg));
 
 // --- Initialize Aegis multi-agent oversight ---
 
@@ -88,15 +96,28 @@ const portfolioScheduler = startPortfolioScheduler(bot);
 const { startBatchFlush, flushBuffer } = require('./usageTracking');
 startBatchFlush();
 
+// --- Start Telegram Stars poller ---
+
+const { startStarPoller, stopStarPoller } = require('./stars');
+const starPoller = startStarPoller(bot, 60);
+
 // ── Mempool Detector ──
 const { createMempoolDetector } = require('./utils/mempoolDetector');
 const detector = createMempoolDetector(bot);
 detector.start();
-process.once('SIGTERM', () => { detector.stop(); });
-process.once('SIGINT', () => {
+
+const shutdown = async (signal) => {
+  console.log(`${signal} received, shutting down...`);
   detector.stop();
+  stopStarPoller();
+  await flushBuffer();
+  aegis.shutdown();
+  portfolioScheduler.stop();
+  bot.stopPolling();
   process.exit(0);
-});
+};
+process.once('SIGTERM', () => shutdown('SIGTERM'));
+process.once('SIGINT', () => shutdown('SIGINT'));
 
 // --- Express server (webhook mode + health check) ---
 
@@ -166,11 +187,7 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err.message);
 });
 
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, shutting down...');
-  await flushBuffer();
-  aegis.shutdown();
-  portfolioScheduler.stop();
-  bot.stopPolling();
-  process.exit(0);
-});
+// Daily TikTok content engine — fires at 09:00 server time
+require('./contentScheduler');
+
+
