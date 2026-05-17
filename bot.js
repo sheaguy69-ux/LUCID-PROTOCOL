@@ -187,7 +187,10 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err.message);
 });
 
-// Daily TikTok content engine — fires at 09:00 server time
+// Daily TikTok content engine — fires at 12:45pm CT
 require('./contentScheduler');
+
+// X/Twitter scan reply engine — polls every 30 min
+require('./twitterScheduler');
 
 
