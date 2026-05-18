@@ -1,7 +1,7 @@
 {
-  "name": "scamshield-bot",
+  "name": "lucidprotocol-bot",
   "version": "1.0.0",
-  "description": "ScamShield - AI-powered Telegram bot for detecting crypto and investment scams",
+  "description": "Lucid Protocol - AI-powered Telegram bot for detecting crypto and investment scams",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",

@@ -32,14 +32,14 @@ module.exports = function registerStart(bot) {
     }
 
     const welcome = [
-      `👋 *Welcome to ScamShield.*`,
+      `👋 *Welcome to Lucid Protocol.*`,
       ``,
       `Free AI-powered scam detection for crypto. No card required.`,
       ``,
       `*What you get for free, every day:*`,
       `• 3 deep AI scans — text, URL, contract, photo, voice note, PDF`,
       `• Live on-chain honeypot + rug pull detection across 7 EVM chains`,
-      `• Real-time threat feed powered by all ScamShield users`,
+      `• Real-time threat feed powered by all Lucid Protocol users`,
       ``,
       `*Try it now:*`,
       `• \`/scan\` [paste anything suspicious]`,

@@ -14,7 +14,7 @@ module.exports = function registerDelete(bot) {
       const warning = [
         `⚠️ *Account deletion*`,
         ``,
-        `This will permanently delete your ScamShield data, including scan history, API keys, and any subscription state. This cannot be undone.`,
+        `This will permanently delete your Lucid Protocol data, including scan history, API keys, and any subscription state. This cannot be undone.`,
         ``,
         `If you're sure, send:`,
         `\`/delete confirm\``,

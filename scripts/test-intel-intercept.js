@@ -24,7 +24,7 @@ instantly. Limited slots — act now! http://scam-test-${Date.now()}.example`;
     urls: [`http://scam-test-${Date.now()}.example`],
     contracts: ['0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef'],
     risk: 9,
-    sourceProduct: 'scamshield_tg',
+    sourceProduct: 'lucidprotocol_tg',
     userId: 'smoke-test-user',
     mediaType: 'text',
   });
@@ -48,7 +48,7 @@ instantly. Limited slots — act now! http://scam-test-${Date.now()}.example`;
   const low = await fireIntercept({
     rawText: 'boring message',
     risk: 2,
-    sourceProduct: 'scamshield_tg',
+    sourceProduct: 'lucidprotocol_tg',
     userId: 'smoke-test-user',
   });
   console.log('[test] low-risk result:', low);

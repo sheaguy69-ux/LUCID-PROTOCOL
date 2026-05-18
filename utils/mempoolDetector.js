@@ -45,7 +45,7 @@ function getThreatIntelClient() {
 
   threatIntelClient = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { 'x-application-name': 'scamshield-bot-mempool' } },
+    global: { headers: { 'x-application-name': 'lucidprotocol-bot-mempool' } },
   });
   return threatIntelClient;
 }

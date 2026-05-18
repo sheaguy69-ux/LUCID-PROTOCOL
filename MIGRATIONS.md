@@ -1,4 +1,4 @@
-# ScamShield Database Migrations
+# Lucid Protocol Database Migrations
 
 The bot uses two migration directories with overlapping numbers but different purposes.
 Apply `migrations/` first (core schema), then `db/migrations/` (feature extensions).
@@ -38,7 +38,7 @@ These extend the schema after the core tables exist. Numbering starts at 002 but
 
 ## Correct Application Order
 
-Run in the following sequence in your Supabase SQL Editor (main ScamShield project):
+Run in the following sequence in your Supabase SQL Editor (main Lucid Protocol project):
 
 ```
 migrations/001_initial_schema.sql
@@ -69,7 +69,7 @@ the tables they patch exist.
 ### `db/migrations/007_protected_pools.sql` — Threat-Intel Project
 
 This migration targets the **threat-intel Supabase project** (`THREAT_INTEL_URL` /
-`THREAT_INTEL_SERVICE_KEY`) — **not** the main ScamShield project. Apply it separately
+`THREAT_INTEL_SERVICE_KEY`) — **not** the main Lucid Protocol project. Apply it separately
 in the threat-intel project's SQL Editor.
 
 ```

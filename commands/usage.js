@@ -11,7 +11,7 @@ module.exports = function registerUsageCommand(bot) {
 
     const sub = await getSubscriberTier(userId);
     const e = escapeMarkdownV2;
-    const lines = ['*📊 ScamShield Usage*', ''];
+    const lines = ['*📊 Lucid Protocol Usage*', ''];
 
     // Tier info
     const tierLabel = sub.tier === 'none' ? 'None' : sub.tier.charAt(0).toUpperCase() + sub.tier.slice(1);

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Lucid Armor — X/Twitter Scan Reply Engine
+ * Lucid Protocol — X/Twitter Scan Reply Engine
  *
  * Polls Twitter Search API v2 every 30 min for tweets containing
  * EVM contract addresses or token safety questions. Scans each with
@@ -103,7 +103,7 @@ async function generateReply(tweet, scanResult) {
     ? scanResult.flags.join(', ')
     : 'no major red flags';
 
-  const prompt = `You write short, punchy Twitter/X replies for Lucid Armor — a crypto scam scanner.
+  const prompt = `You write short, punchy Twitter/X replies for Lucid Protocol — a crypto scam scanner.
 
 Someone tweeted: "${tweet.text.slice(0, 200)}"
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Lucid Armor — Daily TikTok Content Engine
+ * Lucid Protocol — Daily TikTok Content Engine
  *
  * Runs every morning. Pulls the most hyped tokens on DexScreener,
  * scans each with GoPlus, picks the most scandalous result, and
@@ -151,7 +151,7 @@ async function generateScript(token, scan) {
     ? scan.flags.join(', ')
     : 'no major red flags detected';
 
-  const prompt = `You write punchy, authentic TikTok scripts for a crypto scam detection tool called Lucid Armor.
+  const prompt = `You write punchy, authentic TikTok scripts for a crypto scam detection tool called Lucid Protocol.
 
 TOKEN: ${token.name} ($${token.symbol})
 24h Volume: $${Number(token.volume24h).toLocaleString()}
@@ -162,7 +162,7 @@ Risk flags: ${scan.flags?.join(', ') || 'none'}
 Write a 30-second TikTok script. Rules:
 - Open with a HOOK that creates instant curiosity (no "Hey guys", no "Today I'm going to")
 - Show the scan result dramatically — let the data be the reveal
-- One line CTA at the end pointing to the Lucid Armor bot
+- One line CTA at the end pointing to the Lucid Protocol bot
 - Crypto-native voice. No corporate speak. No fake hype. Real and direct.
 - Format: HOOK / SCAN MOMENT / REACTION / CTA — each on its own line
 - Max 80 words total
@@ -242,14 +242,14 @@ async function main() {
     // No risky tokens found — send a "all clean today" message
     await sendTelegram(
       ANTHONY_CHAT_ID,
-      `🛡 *Lucid Armor Content Engine*\n\nScanned ${results.length} trending tokens today — unusually clean. No strong drama. Try again tomorrow or pick a specific token to scan manually.`
+      `🛡 *Lucid Protocol Content Engine*\n\nScanned ${results.length} trending tokens today — unusually clean. No strong drama. Try again tomorrow or pick a specific token to scan manually.`
     );
     return;
   }
 
   // Build and send the daily brief
   const date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-  let message = `🎬 *Lucid Armor — TikTok Scripts for ${date}*\n\n`;
+  let message = `🎬 *Lucid Protocol — TikTok Scripts for ${date}*\n\n`;
   message += `Scanned ${results.length} trending tokens. Top ${picks.length} picks:\n\n`;
 
   for (let i = 0; i < picks.length; i++) {

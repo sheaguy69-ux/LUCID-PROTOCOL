@@ -6,7 +6,7 @@ module.exports = function registerUpgradeCommand(bot) {
     const chatId = msg.chat.id;
 
     const text = [
-      '🛡 *Upgrade ScamShield*',
+      '🛡 *Upgrade Lucid Protocol*',
       '',
       '*Pro \\($8/mo\\)* — 1,000 scans, API access, full Aegis oversight',
       '*Unlimited \\($17/mo\\)* — Unlimited scans, admin dashboard, custom policies',

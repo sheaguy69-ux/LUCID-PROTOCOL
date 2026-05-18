@@ -158,7 +158,7 @@ if (BOT_MODE === 'webhook') {
         console.error(`[FATAL] Webhook verification failed. Expected token in URL, got: ${info.url}`);
         process.exit(1);
       }
-      console.log(`ScamShield bot running in webhook mode on port ${PORT}`);
+      console.log(`Lucid Protocol bot running in webhook mode on port ${PORT}`);
       console.log(`Webhook verified: ${WEBHOOK_URL}/webhook/***`);
     } catch (err) {
       console.error(`[FATAL] Failed to set webhook: ${err.message}`);
@@ -168,7 +168,7 @@ if (BOT_MODE === 'webhook') {
 } else {
   // In polling mode, still start Express for health checks
   app.listen(PORT, () => {
-    console.log(`ScamShield bot running in polling mode`);
+    console.log(`Lucid Protocol bot running in polling mode`);
     console.log(`Health check available at http://localhost:${PORT}/health`);
   });
 }

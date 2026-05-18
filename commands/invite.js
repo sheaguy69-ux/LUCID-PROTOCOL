@@ -20,7 +20,7 @@ module.exports = function registerInvite(bot) {
     const body = [
       `🎁 *Invite friends → earn bonus scans*`,
       ``,
-      `Every friend who joins ScamShield via your link gets you *+${BONUS_PER_REFERRAL} bonus scans*.`,
+      `Every friend who joins Lucid Protocol via your link gets you *+${BONUS_PER_REFERRAL} bonus scans*.`,
       `Bonus scans stack on top of your 3 free daily and never expire.`,
       ``,
       `Your stats:`,

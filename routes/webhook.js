@@ -98,7 +98,7 @@ async function handleCheckoutCompleted(bot, session) {
     const trialMsg = trialEndsAt
       ? `Your 7-day trial starts now. You won't be charged until ${new Date(trialEndsAt).toLocaleDateString()}.`
       : '';
-    message = `🎉 Welcome to ScamShield ${tierLabel}! ${trialMsg}\n\nUse /scan to start scanning. Use /usage to check your balance.`;
+    message = `🎉 Welcome to Lucid Protocol ${tierLabel}! ${trialMsg}\n\nUse /scan to start scanning. Use /usage to check your balance.`;
   }
 
   try {
@@ -148,7 +148,7 @@ async function handleSubscriptionDeleted(bot, subscription) {
 
   try {
     await bot.sendMessage(subscriber.telegram_user_id,
-      'Your ScamShield subscription has ended. You\'ll need to resubscribe to scan.\n\nType /upgrade anytime to start a new subscription.'
+      'Your Lucid Protocol subscription has ended. You\'ll need to resubscribe to scan.\n\nType /upgrade anytime to start a new subscription.'
     );
   } catch (err) {
     console.error('Failed to notify user of subscription cancellation:', err.message);
@@ -166,7 +166,7 @@ async function handlePaymentFailed(bot, invoice) {
 
   try {
     await bot.sendMessage(subscriber.telegram_user_id,
-      '⚠️ Your ScamShield payment failed. Please update your payment method:\n\nType /manage to update your billing info.'
+      '⚠️ Your Lucid Protocol payment failed. Please update your payment method:\n\nType /manage to update your billing info.'
     );
   } catch (err) {
     console.error('Failed to notify user of payment failure:', err.message);
