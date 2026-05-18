@@ -36,7 +36,7 @@ function getThreatIntelClient() {
 
   threatIntelClient = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { 'x-application-name': 'scamshield-bot-abyssal' } },
+    global: { headers: { 'x-application-name': 'lucidprotocol-bot-abyssal' } },
   });
   return threatIntelClient;
 }
@@ -55,7 +55,7 @@ function formatLanding() {
     '🌊 *Abyssal — On-Chain Pool Protection*',
     '',
     'Liquidity-pool monitoring and scam detection for your DeFi holdings.',
-    'ScamShield protects what you _see_. Abyssal protects what you _hold_.',
+    'Lucid Protocol protects what you _see_. Abyssal protects what you _hold_.',
     '',
     '*Protection features:*',
     '🔹 Real-time mempool monitoring for suspicious activity',

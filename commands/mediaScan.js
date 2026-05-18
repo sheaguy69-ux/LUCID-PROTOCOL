@@ -83,7 +83,7 @@ async function handleMediaMessage(bot, msg) {
         ``,
         e(reason),
         ``,
-        `_This scan was flagged by Aegis, ScamShield's oversight system\\._`,
+        `_This scan was flagged by Aegis, Lucid Protocol's oversight system\\._`,
       ].join('\n');
       await bot.sendMessage(chatId, blocked, { parse_mode: 'MarkdownV2' });
       return;

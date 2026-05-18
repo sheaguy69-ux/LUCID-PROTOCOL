@@ -1,5 +1,5 @@
 /**
- * Lucid Armor — Content Engine Scheduler
+ * Lucid Protocol — Content Engine Scheduler
  * Fires daily-content.js at 09:00 every day (server local time).
  * Required once from bot.js — runs silently alongside the bot process.
  */

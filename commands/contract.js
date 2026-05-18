@@ -71,7 +71,7 @@ module.exports = function registerContractCommand(bot) {
         urls: [],
         contracts: blockchainResult.addresses || [],
         risk,
-        sourceProduct: 'scamshield_tg',
+        sourceProduct: 'lucidprotocol_tg',
         userId,
         mediaType: 'contract',
       }).catch(() => { /* swallow */ });

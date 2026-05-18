@@ -1,19 +1,19 @@
-# ScamShield Telegram Bot
+# Lucid Protocol Telegram Bot
 
 AI-powered Telegram bot for detecting crypto and investment scams. Combines Claude Sonnet for deep analysis, VirusTotal for URL reputation, blockchain security APIs, and pattern matching for fast, layered detection.
 
 ---
 
-## What Is ScamShield?
+## What Is Lucid Protocol?
 
-ScamShield is a security-first Telegram bot that helps users identify crypto scams, phishing links, honeypot tokens, rug pulls, and social engineering attacks in real time. It is designed for:
+Lucid Protocol is a security-first Telegram bot that helps users identify crypto scams, phishing links, honeypot tokens, rug pulls, and social engineering attacks in real time. It is designed for:
 
 - Individual crypto users who need fast on-demand risk checks
 - Community admins who want automated threat monitoring
 - Pro and Unlimited subscribers who get daily Portfolio Shield alerts and advanced features
 - Abyssal MEV Defense subscribers who protect DeFi positions from sandwich attacks and drain attempts
 
-ScamShield does not require a wallet signature or private key access for any scan — all scanning is read-only.
+Lucid Protocol does not require a wallet signature or private key access for any scan — all scanning is read-only.
 
 ---
 
@@ -56,7 +56,7 @@ Supported chains: `eth`, `bsc`, `polygon`, `arb`, `base`, `op`, `avax`, `sol`.
 |---------|-------------|
 | `/abyssal` | Activate Abyssal tier — real-time MEV intercept and DeFi pool protection |
 
-Abyssal is a commission-only tier ($0/month). ScamShield takes 17% of verified value saved from intercepted attacks.
+Abyssal is a commission-only tier ($0/month). Lucid Protocol takes 17% of verified value saved from intercepted attacks.
 
 ### Invite & Referrals
 
@@ -68,7 +68,7 @@ Abyssal is a commission-only tier ($0/month). ScamShield takes 17% of verified v
 
 | Command | Description |
 |---------|-------------|
-| `/security` | View ScamShield's security posture and how your data is handled |
+| `/security` | View Lucid Protocol's security posture and how your data is handled |
 | `/privacy` | View the privacy policy |
 | `/optout` | Opt out of anonymous analytics |
 | `/delete` | Permanently delete all your data (GDPR compliant) |
@@ -144,7 +144,7 @@ Set these in your `.env` file or Railway environment variables.
 
 ```bash
 # 1. Clone and install
-cd scamshield-bot
+cd lucidprotocol-bot
 npm install
 
 # 2. Configure environment
@@ -165,7 +165,7 @@ Health check: `http://localhost:3000/health`
 
 ## Deployment to Railway
 
-ScamShield is configured for Railway deployment via `railway.toml` (Nixpacks build, `node bot.js` start command, `/health` health check, restart on failure up to 5 times).
+Lucid Protocol is configured for Railway deployment via `railway.toml` (Nixpacks build, `node bot.js` start command, `/health` health check, restart on failure up to 5 times).
 
 1. Push the repo to GitHub.
 2. Create a Railway project and connect the GitHub repo.

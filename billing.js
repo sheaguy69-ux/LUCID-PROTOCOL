@@ -37,7 +37,7 @@ async function createCheckoutSession(telegramUserId, telegramUsername, tier) {
   };
 
   // Abyssal Active Defense: no free trial (commission-based, only charge on save)
-  // ScamShield tiers: 7-day trial
+  // Lucid Protocol tiers: 7-day trial
   if (tier === 'abyssal_active') {
     params.subscription_data = {
       // No free trial — user pays $0 unless value is saved

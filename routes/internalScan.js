@@ -8,7 +8,7 @@
 //
 // POST /internal/scan
 //   Headers: x-internal-secret: <INTERNAL_SCAN_SECRET>
-//   Body:    { content, guildId?, userId?, sourceProduct?='scamshield_discord' }
+//   Body:    { content, guildId?, userId?, sourceProduct?='lucidprotocol_discord' }
 //   Returns: { success, data: { risk_score, attack_type, indicators, reasoning,
 //                               advice, analysis_source, urls, contracts,
 //                               blockchain, semantic_matches, elapsed_ms } }
@@ -57,7 +57,7 @@ router.post('/scan', authenticateInternal, async (req, res) => {
 
   try {
     const result = await analyzeContent(content, {
-      sourceProduct: sourceProduct || 'scamshield_discord',
+      sourceProduct: sourceProduct || 'lucidprotocol_discord',
       // Tag the intercept with guild_id (hashed) so we can dedupe per-guild.
       userId: guildId || userId || null,
     });

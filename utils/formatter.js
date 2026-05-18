@@ -21,7 +21,7 @@ function formatScanResult(result) {
     .join('\n');
 
   const lines = [
-    `*🛡 ScamShield Analysis*`,
+    `*🛡 Lucid Protocol Analysis*`,
     ``,
     `*Risk Score:* ${e(riskBar(result.riskScore))}`,
     `*Confidence:* ${e(result.confidence + '%')}`,
@@ -228,7 +228,7 @@ function formatStatus(stats, uptimeSeconds) {
   const minutes = Math.floor((uptimeSeconds % 3600) / 60);
 
   return [
-    `*🛡 ScamShield Status*`,
+    `*🛡 Lucid Protocol Status*`,
     ``,
     `*Uptime:* ${e(`${hours}h ${minutes}m`)}`,
     `*Total Scans:* ${e(String(stats.totalScans))}`,
@@ -253,7 +253,7 @@ function formatMultimodalScanResult(result, mediaType) {
     .join('\n');
 
   const lines = [
-    `*🛡 ScamShield Media Analysis*`,
+    `*🛡 Lucid Protocol Media Analysis*`,
     ``,
     `*Type:* ${e(mediaLabel)}`,
     `*Risk Score:* ${e(riskBar(result.riskScore))}`,
@@ -297,7 +297,7 @@ function formatMultimodalScanResult(result, mediaType) {
 
 function formatHelp() {
   return [
-    `*🛡 ScamShield Bot*`,
+    `*🛡 Lucid Protocol Bot*`,
     ``,
     `AI\\-powered scam detection for crypto \\& investment fraud\\.`,
     ``,
@@ -329,7 +329,7 @@ function formatHelp() {
 
 function formatPremium() {
   return [
-    `*⭐ ScamShield Pricing*`,
+    `*⭐ Lucid Protocol Pricing*`,
     ``,
     `*Pro — $8/mo*`,
     `• 1,000 scans/month`,

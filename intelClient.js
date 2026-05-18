@@ -20,10 +20,10 @@ const { createClient } = require('@supabase/supabase-js');
 const RISK_THRESHOLD = parseInt(process.env.THREAT_INTEL_RISK_THRESHOLD || '7', 10);
 
 const ALLOWED_SOURCES = new Set([
-  'scamshield_tg',
-  'scamshield_discord',
-  'scamshield_web',
-  'scamshield_mobile',
+  'lucidprotocol_tg',
+  'lucidprotocol_discord',
+  'lucidprotocol_web',
+  'lucidprotocol_mobile',
   'shroud',
 ]);
 
@@ -49,7 +49,7 @@ function getClient() {
 
   client = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { 'x-application-name': 'scamshield-bot-producer' } },
+    global: { headers: { 'x-application-name': 'lucidprotocol-bot-producer' } },
   });
   return client;
 }

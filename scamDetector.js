@@ -391,7 +391,7 @@ async function analyzeContent(input, opts = {}) {
     urls: parsed.urls || [],
     contracts,
     risk: riskScore,
-    sourceProduct: opts.sourceProduct || 'scamshield_tg',
+    sourceProduct: opts.sourceProduct || 'lucidprotocol_tg',
     userId: opts.userId,
     mediaType: parsed.urls.length > 0 ? 'url' : 'text',
   }).catch(() => { /* swallow — never block user */ });
@@ -480,7 +480,7 @@ async function analyzeMultimodalContent(mediaData, caption = '', opts = {}) {
     urls: parsed.urls || [],
     contracts: mmContracts,
     risk: riskScore,
-    sourceProduct: opts.sourceProduct || 'scamshield_tg',
+    sourceProduct: opts.sourceProduct || 'lucidprotocol_tg',
     userId: opts.userId,
     mediaType: mediaInfo.type === 'image' ? 'image'
       : mediaInfo.type === 'audio' ? 'audio'

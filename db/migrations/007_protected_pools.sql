@@ -1,6 +1,6 @@
 -- Protected pools table for Abyssal MEV Defense
 -- This goes on the threat-intel Supabase project (THREAT_INTEL_URL / THREAT_INTEL_SERVICE_KEY)
--- NOT the main ScamShield Supabase
+-- NOT the main Lucid Protocol Supabase
 
 create table if not exists public.protected_pools (
   id bigint generated always as identity primary key,

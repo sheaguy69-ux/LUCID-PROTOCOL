@@ -1,6 +1,6 @@
 -- Commission Transactions Schema v0.1
 -- Tracks 17% commission on verified value saved by Abyssal Active Defense.
--- Run on your main ScamShield Supabase project (not the threat-intel project).
+-- Run on your main Lucid Protocol Supabase project (not the threat-intel project).
 
 create table if not exists public.commission_transactions (
   id uuid primary key default gen_random_uuid(),

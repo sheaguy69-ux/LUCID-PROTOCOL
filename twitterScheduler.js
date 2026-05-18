@@ -1,5 +1,5 @@
 /**
- * Lucid Armor — Twitter Scanner Scheduler
+ * Lucid Protocol — Twitter Scanner Scheduler
  * Polls every 30 minutes. Silently skips if TWITTER_BEARER_TOKEN not set.
  */
 

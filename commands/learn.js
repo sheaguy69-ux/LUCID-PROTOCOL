@@ -78,7 +78,7 @@ module.exports = function registerLearnCommand(bot) {
   // Show usage
   bot.onText(/\/learn(?:@\w+)?$/, (msg) => {
     const lines = [
-      `*🧠 Teach ScamShield*`,
+      `*🧠 Teach Lucid Protocol*`,
       ``,
       `Help us detect new scams by teaching the bot\\!`,
       ``,

@@ -1,14 +1,14 @@
-# ScamShield Stripe Monetization — Design Spec
+# Lucid Protocol Stripe Monetization — Design Spec
 
 **Date:** 2026-04-11
 **Status:** Draft
-**Goal:** Wire up Stripe payments via Telegram so ScamShield can charge for Pro ($8/mo) and Unlimited ($17/mo) tiers, with a 7-day free trial. No free tier — all scans require an active subscription.
+**Goal:** Wire up Stripe payments via Telegram so Lucid Protocol can charge for Pro ($8/mo) and Unlimited ($17/mo) tiers, with a 7-day free trial. No free tier — all scans require an active subscription.
 
 ---
 
 ## Context
 
-ScamShield has a working Telegram bot and REST API with AI-powered scam detection. Pricing tiers are designed (Free/Pro/Unlimited), metering and API key systems are built, but there's no payment collection or tier enforcement. Users currently get unlimited access for free.
+Lucid Protocol has a working Telegram bot and REST API with AI-powered scam detection. Pricing tiers are designed (Free/Pro/Unlimited), metering and API key systems are built, but there's no payment collection or tier enforcement. Users currently get unlimited access for free.
 
 This spec adds the minimum needed to start charging: Stripe integration via Telegram, subscription lifecycle handling, and scan gating by tier.
 
@@ -68,8 +68,8 @@ CREATE INDEX idx_subscribers_stripe_customer ON subscribers(stripe_customer_id);
 ## Stripe Setup (Manual Steps)
 
 1. Create two Products in Stripe Dashboard:
-   - **ScamShield Pro** — $8/mo recurring
-   - **ScamShield Unlimited** — $17/mo recurring
+   - **Lucid Protocol Pro** — $8/mo recurring
+   - **Lucid Protocol Unlimited** — $17/mo recurring
 2. Copy the Price IDs
 3. Add to `.env`:
    ```
@@ -91,7 +91,7 @@ CREATE INDEX idx_subscribers_stripe_customer ON subscribers(stripe_customer_id);
 1. User sends `/upgrade` in Telegram
 2. Bot replies with message showing both tiers + inline keyboard:
    ```
-   🛡️ Upgrade ScamShield
+   🛡️ Upgrade Lucid Protocol
 
    Pro ($8/mo) — 1,000 scans, API access, full Aegis
    Unlimited ($17/mo) — Unlimited scans, admin dashboard
@@ -140,7 +140,7 @@ All events verified with `stripe.webhooks.constructEvent()` using the webhook se
   - `trial_ends_at`: from subscription.trial_end
 - Send Telegram confirmation message to user:
   ```
-  🎉 Welcome to ScamShield Pro! Your 7-day trial starts now.
+  🎉 Welcome to Lucid Protocol Pro! Your 7-day trial starts now.
   You won't be charged until [trial_end_date].
   Use /usage to check your scan balance.
   ```
@@ -155,7 +155,7 @@ All events verified with `stripe.webhooks.constructEvent()` using the webhook se
 - Set `subscription_tier = 'none'`, `subscription_status = 'none'`
 - Notify user via Telegram:
   ```
-  Your ScamShield subscription has ended. You'll need to resubscribe to scan.
+  Your Lucid Protocol subscription has ended. You'll need to resubscribe to scan.
   Type /upgrade anytime to start a new subscription.
   ```
 
@@ -164,7 +164,7 @@ All events verified with `stripe.webhooks.constructEvent()` using the webhook se
 - Update `subscription_status = 'past_due'`
 - Notify user via Telegram:
   ```
-  ⚠️ Your ScamShield payment failed. Please update your payment method:
+  ⚠️ Your Lucid Protocol payment failed. Please update your payment method:
   Type /manage to update your billing info.
   ```
 
@@ -198,7 +198,7 @@ All events verified with `stripe.webhooks.constructEvent()` using the webhook se
 getSubscriberTier(telegramUserId) → { tier, status }
 
 if status NOT IN ('active', 'trialing'):
-  → BLOCK: "ScamShield requires a subscription. Type /upgrade to start your free 7-day trial."
+  → BLOCK: "Lucid Protocol requires a subscription. Type /upgrade to start your free 7-day trial."
 
 if tier == 'pro' AND scans_this_month >= 1000:
   → BLOCK: "You've used all 1,000 scans this month. Type /upgrade to go Unlimited."
@@ -226,7 +226,7 @@ Before running the scan:
 const check = await checkScanAllowance(telegramUserId);
 if (!check.allowed) {
   const msg = check.reason === 'no_subscription'
-    ? 'ScamShield requires a subscription.\nType /upgrade to start your free 7-day trial.'
+    ? 'Lucid Protocol requires a subscription.\nType /upgrade to start your free 7-day trial.'
     : `You've used all ${check.limit} scans this month.\nType /upgrade to go Unlimited.`;
   return bot.sendMessage(chatId, msg);
 }
@@ -245,7 +245,7 @@ Before running the scan:
 
 Enhance existing `/usage` to show tier info:
 ```
-📊 ScamShield Usage (April 2026)
+📊 Lucid Protocol Usage (April 2026)
 
 Tier: Pro (trial ends Apr 18)
 Scans used: 47 / 1,000
@@ -259,7 +259,7 @@ Type /manage to manage your subscription.
 ## File Structure
 
 ```
-scamshield-bot/
+lucidprotocol-bot/
 ├── billing.js              # NEW: Stripe client, checkout, portal
 ├── commands/
 │   ├── upgrade.js          # NEW: /upgrade with tier selection

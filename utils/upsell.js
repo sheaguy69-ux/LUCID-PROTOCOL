@@ -26,7 +26,7 @@ function buildUpsellMessage(check) {
 
     case 'no_subscription':
       // Legacy path — should rarely fire now that free tier exists.
-      return 'ScamShield requires a subscription.\nType /upgrade to start your free 7-day trial.';
+      return 'Lucid Protocol requires a subscription.\nType /upgrade to start your free 7-day trial.';
 
     default:
       return 'Scans temporarily unavailable. Try again in a moment.';

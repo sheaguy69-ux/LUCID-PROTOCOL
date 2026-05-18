@@ -35,7 +35,7 @@ async function buildContractCrossSell(userId) {
   return [
     '🌊 *Going Deeper — Abyssal*',
     '',
-    'ScamShield scans the _surface_.',
+    'Lucid Protocol scans the _surface_.',
     'Abyssal guards the _deep_.',
     '',
     '🧿 Real-time on-chain monitoring for your LP pools.',
@@ -57,7 +57,7 @@ async function buildScanCrossSell(userId) {
   }
 
   return [
-    '🛡 *ScamShield → Abyssal*',
+    '🛡 *Lucid Protocol → Abyssal*',
     '',
     'We protect the surface.',
     'Abyssal protects what\'s underneath.',

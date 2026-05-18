@@ -1,6 +1,6 @@
 -- Abyssal Subscribers Schema v0.1
 -- Adds JSONB metadata for Abyssal tier to existing subscribers table.
--- Run on your main ScamShield Supabase project (not the threat-intel project).
+-- Run on your main Lucid Protocol Supabase project (not the threat-intel project).
 
 alter table if exists public.subscribers
   add column if not exists abyssal jsonb default null;

@@ -1,4 +1,4 @@
--- ScamShield Bot Database Schema
+-- Lucid Protocol Bot Database Schema
 -- Run this in Supabase SQL Editor
 
 -- scam_reports: stores every scan result
