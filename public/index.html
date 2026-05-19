@@ -86,6 +86,65 @@
       padding: 60px 0 40px;
     }
 
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    @media (min-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1.1fr 1fr;
+        gap: 48px;
+        text-align: left;
+      }
+      .hero-grid .cta-group { justify-content: flex-start; }
+      .hero-grid .tagline { margin-left: 0; }
+    }
+
+    .hero-text { display: flex; flex-direction: column; align-items: center; }
+    @media (min-width: 900px) {
+      .hero-text { align-items: flex-start; }
+    }
+
+    /* --- Character Illustration --- */
+    .character-wrapper {
+      position: relative;
+      display: inline-block;
+      justify-self: center;
+    }
+
+    .character-glow {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--purple-glow) 0%, transparent 65%);
+      animation: glowPulse 4s ease-in-out infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .character-img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 340px;
+      height: auto;
+      border-radius: 20px;
+      animation: logoFloat 5s ease-in-out infinite;
+      filter: drop-shadow(0 12px 32px var(--purple-glow));
+    }
+
+    @media (max-width: 899px) {
+      .character-img { max-width: 240px; }
+      .character-glow { width: 260px; height: 260px; }
+    }
+
     /* --- Logo with Motion Graphic --- */
     .logo-wrapper {
       position: relative;
@@ -689,26 +748,35 @@
 
     <!-- Hero -->
     <section class="hero">
-      <div class="logo-wrapper">
-        <div class="logo-glow"></div>
-        <div class="logo-shield-ring"></div>
-        <div class="logo-shield-ring-2"></div>
-        <img src="/logo.png" alt="Lucid Protocol Logo" class="logo-img">
-      </div>
+      <div class="hero-grid">
+        <div class="hero-text">
+          <div class="logo-wrapper">
+            <div class="logo-glow"></div>
+            <div class="logo-shield-ring"></div>
+            <div class="logo-shield-ring-2"></div>
+            <img src="/logo.png" alt="Lucid Protocol Logo" class="logo-img">
+          </div>
 
-      <h1>See Through the<br><span class="accent">Illusion</span></h1>
-      <p class="tagline">
-        Lucid Protocol strips away the tricks and shows you the truth.
-        AI-powered scam detection backed by Aegis multi-agent oversight.
-      </p>
+          <h1>See Through the<br><span class="accent">Illusion</span></h1>
+          <p class="tagline">
+            Lucid Protocol strips away the tricks and shows you the truth.
+            AI-powered scam detection backed by Aegis multi-agent oversight.
+          </p>
 
-      <div class="cta-group">
-        <a href="https://t.me/LucidProtocol_bot" class="btn btn-primary">
-          Open in Telegram
-        </a>
-        <a href="#pricing" class="btn btn-secondary">
-          View API Pricing
-        </a>
+          <div class="cta-group">
+            <a href="https://t.me/LucidProtocol_bot" class="btn btn-primary">
+              Open in Telegram
+            </a>
+            <a href="#pricing" class="btn btn-secondary">
+              View API Pricing
+            </a>
+          </div>
+        </div>
+
+        <div class="character-wrapper">
+          <div class="character-glow"></div>
+          <img src="/character.svg" alt="Lucid Protocol Guardian" class="character-img">
+        </div>
       </div>
 
       <div class="threats">
