@@ -50,8 +50,6 @@ const registerOptout = require('./commands/optout');
 const registerDelete = require('./commands/delete');
 const registerPortfolio = require('./commands/portfolio');
 const registerAbyssal = require('./commands/abyssal');
-const registerStars = require('./commands/stars');
-const { sendStarsInvoice, handlePreCheckoutQuery, handleSuccessfulPayment } = require('./starsPayment');
 
 registerStart(bot);
 registerPing(bot);
@@ -74,12 +72,6 @@ registerOptout(bot);
 registerDelete(bot);
 registerPortfolio(bot);
 registerAbyssal(bot);
-registerStars(bot);
-
-// --- Register Stars payment handlers ---
-
-bot.on('pre_checkout_query', (query) => handlePreCheckoutQuery(bot, query));
-bot.on('successful_payment', (msg) => handleSuccessfulPayment(bot, msg));
 
 // --- Initialize Aegis multi-agent oversight ---
 
@@ -96,11 +88,6 @@ const portfolioScheduler = startPortfolioScheduler(bot);
 const { startBatchFlush, flushBuffer } = require('./usageTracking');
 startBatchFlush();
 
-// --- Start Telegram Stars poller ---
-
-const { startStarPoller, stopStarPoller } = require('./stars');
-const starPoller = startStarPoller(bot, 60);
-
 // ── Mempool Detector ──
 const { createMempoolDetector } = require('./utils/mempoolDetector');
 const detector = createMempoolDetector(bot);
@@ -109,7 +96,6 @@ detector.start();
 const shutdown = async (signal) => {
   console.log(`${signal} received, shutting down...`);
   detector.stop();
-  stopStarPoller();
   await flushBuffer();
   aegis.shutdown();
   portfolioScheduler.stop();
