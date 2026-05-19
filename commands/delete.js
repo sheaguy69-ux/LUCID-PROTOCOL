@@ -60,14 +60,14 @@ module.exports = function registerDelete(bot) {
           ``,
           `Removed ${totalDeleted} row(s) across ${Object.keys(receipt.tables).length} tables. Your account, scan history, API keys, subscription state, and any tracked-wallet hashes have been deleted from our database.`,
           ``,
-          `Sub-processor reminder: data we shared with Anthropic, GoPlus, Stripe, Telegram, etc. is governed by their own retention. See our [Privacy Policy](https://scamshield.dev/privacy).`,
+          `Sub-processor reminder: data we shared with Anthropic, GoPlus, Stripe, Telegram, etc. is governed by their own retention. See our [Privacy Policy](https://lucidprotocol.dev/privacy).`,
           ``,
           `If you change your mind, just /start again — but you'll be a fresh user with no history.`,
         ].join('\n')
       : [
           `🗑 *Partial deletion.*`,
           ``,
-          `Removed ${totalDeleted} row(s) but ${receipt.errors.length} table(s) errored. The operator has been notified and will finish the deletion within 30 days, as required by our [Privacy Policy](https://scamshield.dev/privacy).`,
+          `Removed ${totalDeleted} row(s) but ${receipt.errors.length} table(s) errored. The operator has been notified and will finish the deletion within 30 days, as required by our [Privacy Policy](https://lucidprotocol.dev/privacy).`,
         ].join('\n');
 
     bot.sendMessage(chatId, reply, {

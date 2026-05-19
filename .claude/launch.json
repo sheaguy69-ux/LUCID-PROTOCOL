@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "scamshield",
+      "name": "lucidprotocol",
       "runtimeExecutable": "node",
       "runtimeArgs": ["bot.js"],
       "port": 3000

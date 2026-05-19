@@ -79,7 +79,7 @@ db/migrations/007_protected_pools.sql
 
 ### Abyssal Schema — Enterprise Scaffold
 
-The enterprise scaffold at `../../scamshield/scamshield-enterprise/db/migrations/`
+The enterprise scaffold at `../../lucidprotocol/lucidprotocol-enterprise/db/migrations/`
 contains `001_abyssal_schema.sql` which defines `protected_pools` with a UUID primary
 key (an earlier version of the schema). This file exists and targets the same
 threat-intel project. If you are setting up the enterprise tier from scratch, prefer

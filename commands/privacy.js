@@ -18,7 +18,7 @@ module.exports = function registerPrivacy(bot) {
       ? [
           `🔐 *Privacy request received.*`,
           ``,
-          `We'll prepare a copy of the data we hold for your Telegram ID and respond within 30 days, as required by our [Privacy Policy](https://scamshield.dev/privacy).`,
+          `We'll prepare a copy of the data we hold for your Telegram ID and respond within 30 days, as required by our [Privacy Policy](https://lucidprotocol.dev/privacy).`,
           ``,
           `Want to opt out of model improvement instead? \`/optout\``,
           `Want to delete your account entirely? \`/delete\``,

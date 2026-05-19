@@ -2,7 +2,7 @@
 
 const { getReferralStats } = require('../metering');
 
-const BOT_USERNAME = process.env.BOT_USERNAME || 'ScamShield_Crypto_bot';
+const BOT_USERNAME = process.env.BOT_USERNAME || 'LucidProtocol_bot';
 const BONUS_PER_REFERRAL = 5;
 
 module.exports = function registerInvite(bot) {
