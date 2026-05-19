@@ -1,0 +1,5 @@
+# Only non-sensitive config is set at build time.
+# Secrets (API keys, tokens) are injected at runtime via Railway's variable system —
+# they must NOT appear in Dockerfile ENV instructions (bakes them into image layers).
+[variables]
+NODE_ENV = "production"

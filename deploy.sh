@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "=== ScamShield Bot — Railway Deployment ==="
+echo "=== Lucid Protocol Bot — Railway Deployment ==="
 
 # Check Railway CLI
 if ! command -v railway &> /dev/null; then
