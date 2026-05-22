@@ -703,12 +703,305 @@
       font-weight: 700;
     }
 
+    /* --- Supported Chains --- */
+    .chains {
+      padding: 60px 0;
+      text-align: center;
+    }
+
+    .chains h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .chains .subtitle {
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    .chain-grid {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .chain-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 16px 22px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      min-width: 110px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .chain-badge:hover {
+      border-color: var(--purple-main);
+      transform: translateY(-3px);
+    }
+
+    .chain-badge .chain-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .chain-badge .chain-ticker {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* --- Demo Scan Result --- */
+    .demo {
+      padding: 60px 0;
+      text-align: center;
+    }
+
+    .demo h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .demo .subtitle {
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    .scan-result {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      text-align: left;
+      font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      box-shadow: 0 0 30px rgba(124, 58, 237, 0.1);
+    }
+
+    .scan-result .scan-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .scan-result .scan-title {
+      font-weight: 700;
+      color: var(--purple-light);
+      letter-spacing: 0.5px;
+    }
+
+    .scan-result .risk-score {
+      font-weight: 800;
+      color: #ef4444;
+      font-size: 1.1rem;
+    }
+
+    .scan-result .scan-url {
+      color: var(--text-secondary);
+      word-break: break-all;
+      margin-bottom: 16px;
+    }
+
+    .scan-result .scan-label {
+      color: var(--purple-light);
+      font-weight: 700;
+      margin: 16px 0 6px;
+    }
+
+    .scan-result .indicator {
+      color: var(--text-secondary);
+      padding: 2px 0;
+    }
+
+    .scan-result .indicator::before {
+      content: "\2717";
+      color: #ef4444;
+      margin-right: 8px;
+      font-weight: 700;
+    }
+
+    .scan-result .ai-analysis {
+      color: var(--text-secondary);
+      font-style: italic;
+      border-left: 2px solid var(--purple-main);
+      padding-left: 14px;
+      margin: 8px 0 16px;
+    }
+
+    .scan-result .scan-meta {
+      color: var(--text-secondary);
+      padding: 2px 0;
+    }
+
+    .scan-result .aegis-footer {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      color: var(--purple-light);
+      font-weight: 600;
+    }
+
+    .scan-result .scan-warn {
+      margin-top: 16px;
+      color: #fca5a5;
+      font-weight: 700;
+    }
+
+    /* --- FAQ --- */
+    .faq {
+      padding: 80px 0;
+    }
+
+    .faq h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .faq .subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+    }
+
+    .faq-list {
+      max-width: 740px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .faq-item summary {
+      padding: 20px 24px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: color 0.2s;
+    }
+
+    .faq-item summary:hover { color: var(--purple-light); }
+
+    .faq-item summary::-webkit-details-marker { display: none; }
+
+    .faq-item summary::after {
+      content: "+";
+      color: var(--purple-light);
+      font-size: 1.4rem;
+      font-weight: 400;
+      transition: transform 0.2s;
+    }
+
+    .faq-item[open] summary::after { transform: rotate(45deg); }
+
+    .faq-item .faq-answer {
+      padding: 0 24px 20px;
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
     /* --- Footer --- */
     footer {
-      padding: 40px 0;
-      text-align: center;
+      padding: 56px 0 40px;
       border-top: 1px solid var(--border);
       margin-top: 40px;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .footer-brand {
+      max-width: 280px;
+    }
+
+    .footer-brand .footer-logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--purple-light);
+      margin-bottom: 8px;
+    }
+
+    .footer-brand .footer-slogan {
+      color: var(--text-secondary);
+      font-style: italic;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-social a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-social a:hover { color: var(--purple-light); }
+
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-links .footer-links-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--purple-light); }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
     }
 
     footer p {
@@ -741,7 +1034,9 @@
         <a href="#features">Features</a>
         <a href="#abyssal">Abyssal</a>
         <a href="#aegis">Aegis</a>
+        <a href="#chains">Chains</a>
         <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
         <a href="/api/scan" target="_blank">API</a>
       </div>
     </nav>
@@ -914,6 +1209,59 @@
       </div>
     </section>
 
+    <!-- Supported Chains -->
+    <section class="chains" id="chains">
+      <h2>Supported Chains</h2>
+      <p class="subtitle">
+        All 7 chains supported across both the scam detection scanner and Abyssal MEV protection. More coming soon.
+      </p>
+      <div class="chain-grid">
+        <div class="chain-badge"><span class="chain-name">Ethereum</span><span class="chain-ticker">ETH</span></div>
+        <div class="chain-badge"><span class="chain-name">BNB Chain</span><span class="chain-ticker">BSC</span></div>
+        <div class="chain-badge"><span class="chain-name">Polygon</span><span class="chain-ticker">MATIC / POL</span></div>
+        <div class="chain-badge"><span class="chain-name">Arbitrum</span><span class="chain-ticker">ARB</span></div>
+        <div class="chain-badge"><span class="chain-name">Optimism</span><span class="chain-ticker">OP</span></div>
+        <div class="chain-badge"><span class="chain-name">Base</span><span class="chain-ticker">BASE</span></div>
+        <div class="chain-badge"><span class="chain-name">Solana</span><span class="chain-ticker">SOL</span></div>
+      </div>
+    </section>
+
+    <!-- Demo Scan Result -->
+    <section class="demo" id="demo">
+      <h2>See a Scan in Action</h2>
+      <p class="subtitle">A real example of what Lucid Protocol returns — risk score, indicators, AI reasoning, and silent Aegis oversight.</p>
+
+      <div class="scan-result">
+        <div class="scan-head">
+          <span class="scan-title">🔍 SCAN RESULT</span>
+          <span class="risk-score">9/10 🚨</span>
+        </div>
+        <div class="scan-url">URL: https://uniswap-swap[.]finance/new-airdrop</div>
+
+        <div class="scan-label">Indicators</div>
+        <div class="indicator">Clone of known protocol (Uniswap)</div>
+        <div class="indicator">Recently registered domain (3 days old)</div>
+        <div class="indicator">No social links or project documentation</div>
+        <div class="indicator">Requests wallet connection immediately</div>
+        <div class="indicator">Suspicious contract permissions detected</div>
+
+        <div class="scan-label">AI Analysis</div>
+        <div class="ai-analysis">
+          "This is a classic airdrop phishing lure. The URL mimics Uniswap's branding but is hosted on a newly registered domain with no legitimate project presence. The contract requests approval to spend your tokens — a standard wallet drainer setup."
+        </div>
+
+        <div class="scan-meta">Media Scan: No media attached</div>
+        <div class="scan-meta">VirusTotal: ⚠️ Flagged by 12/90 vendors</div>
+
+        <div class="aegis-footer">
+          🛡 Aegis Oversight: PASSED ✓<br>
+          Processed by: claude-sonnet-4 via Aegis
+        </div>
+
+        <div class="scan-warn">⚠️ DO NOT CONNECT YOUR WALLET</div>
+      </div>
+    </section>
+
     <!-- Pricing -->
     <section class="pricing" id="pricing">
       <h2>Simple Pricing</h2>
@@ -948,9 +1296,75 @@
       </div>
     </section>
 
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+      <h2>Frequently Asked Questions</h2>
+      <p class="subtitle">Everything you need to know about how Lucid Protocol works.</p>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>What chains does Lucid Protocol support?</summary>
+          <div class="faq-answer">We currently support 7 chains: Ethereum, BNB Chain (BSC), Polygon, Arbitrum, Optimism, Base, and Solana. More coming soon.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How does the AI actually detect scams?</summary>
+          <div class="faq-answer">Every scan goes through our 6-stage pipeline. It starts with your input (link, text, image, or audio), then Claude AI analyzes it for social engineering patterns and red flags. We cross-check URLs against 90+ vendors via VirusTotal, compare against our semantic memory of known scam patterns, scan any media files, and then Aegis silently reviews the final decision before it's returned to you.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can it detect scams in images or voice messages?</summary>
+          <div class="faq-answer">Yes. Send any photo, audio clip, voice note, or PDF. Our multimodal AI analyzes media across formats and returns a risk score with reasoning.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What happens if Aegis catches a mistake?</summary>
+          <div class="faq-answer">Aegis operates silently in the background. If the primary AI is uncertain or about to return a false result, Aegis blocks it and either corrects the score or flags it for review. You never see the mistakes.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How fast are the results?</summary>
+          <div class="faq-answer">Most scans return a full risk score with detailed reasoning in under 10 seconds.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What is MEV and why do I need protection?</summary>
+          <div class="faq-answer">MEV (Maximal Extractable Value) is when bots extract value from your DeFi transactions — sandwich attacks, front-running, JIT liquidity attacks. Abyssal detects these in real time and either alerts you or automatically blocks them before they hit your wallet.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Do you store my wallet address or personal data?</summary>
+          <div class="faq-answer">No. We log only scan metadata (timestamp, chain, risk score, input type) for product improvement. We never store private keys, wallet balances, or personal identifiers.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Is there a free tier?</summary>
+          <div class="faq-answer">Yes. Every new user gets 7 days of Pro free. Alert-only MEV monitoring is also permanently free — no credit card required.</div>
+        </details>
+      </div>
+    </section>
+
     <!-- Footer -->
     <footer>
-      <p>Lucid Protocol &mdash; built by <a href="#">BUTTA / Gateway Visions</a></p>
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-logo">Lucid Protocol</div>
+          <div class="footer-slogan">"See Through the Illusion"</div>
+          <div class="footer-social">
+            <a href="https://t.me/LucidProtocol_bot">Telegram</a>
+            <a href="#">Twitter / X</a>
+            <a href="#">Discord</a>
+            <a href="#">GitHub</a>
+            <a href="#">Medium</a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <div class="footer-links-title">Links</div>
+          <a href="#">Home</a>
+          <a href="/api/scan" target="_blank">API Docs</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#abyssal">MEV Protection</a>
+          <a href="/privacy.html">Privacy Policy</a>
+          <a href="/terms.html">Terms of Service</a>
+          <a href="mailto:support@lucidprotocol.dev">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Lucid Protocol. Built on Aegis.</p>
+      </div>
     </footer>
   </div>
   <script>

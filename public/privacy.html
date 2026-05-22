@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lucid Protocol — Privacy Policy</title>
+  <meta name="description" content="Lucid Protocol Privacy Policy — what we collect, what we don't, and how your data is handled.">
+  <link rel="icon" type="image/png" href="/logo.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #0a0a1a;
+      --bg-card: #12122a;
+      --purple-main: #7c3aed;
+      --purple-light: #a78bfa;
+      --text-primary: #f0f0ff;
+      --text-secondary: #9ca3af;
+      --border: rgba(124, 58, 237, 0.2);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; border-bottom: 1px solid var(--border); }
+    nav .brand { font-size: 1.1rem; font-weight: 700; color: var(--purple-light); letter-spacing: 0.5px; text-decoration: none; }
+    nav a.back { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
+    nav a.back:hover { color: var(--text-primary); }
+    .doc { padding: 48px 0 80px; }
+    .doc h1 { font-size: 2.2rem; margin-bottom: 8px; }
+    .doc .updated { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 40px; }
+    .doc h2 { font-size: 1.3rem; margin: 36px 0 12px; color: var(--purple-light); }
+    .doc p { color: var(--text-secondary); margin-bottom: 14px; }
+    .doc ul { list-style: none; margin-bottom: 14px; }
+    .doc li { color: var(--text-secondary); padding: 5px 0; }
+    .doc li::before { content: "•"; color: var(--purple-light); margin-right: 12px; font-weight: 700; }
+    .doc a { color: var(--purple-light); text-decoration: none; }
+    .doc a:hover { text-decoration: underline; }
+    footer { padding: 40px 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { color: var(--text-secondary); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="/" class="brand">Lucid Protocol</a>
+      <a href="/" class="back">&larr; Back to home</a>
+    </nav>
+
+    <article class="doc">
+      <h1>Privacy Policy</h1>
+      <p class="updated">Lucid Protocol — Last updated: May 2025</p>
+
+      <h2>What we collect</h2>
+      <ul>
+        <li>Scan metadata: timestamp, chain, input type, risk score</li>
+        <li>Telegram user ID (for delivering scan results)</li>
+        <li>API usage logs (for throttling and abuse prevention)</li>
+      </ul>
+
+      <h2>What we do NOT collect</h2>
+      <ul>
+        <li>Wallet private keys</li>
+        <li>Wallet balances or transaction history</li>
+        <li>Personal data beyond your Telegram ID</li>
+      </ul>
+
+      <h2>Third-party integrations</h2>
+      <ul>
+        <li>Google (Gmail integration for email scam scanning) — you can revoke access anytime at <a href="https://myaccount.google.com" target="_blank" rel="noopener">myaccount.google.com</a></li>
+        <li>VirusTotal — URLs are submitted for threat checking per their privacy policy</li>
+        <li>Telegram — scan requests and results are processed through Telegram's API</li>
+      </ul>
+
+      <h2>Data retention</h2>
+      <p>Scan metadata is retained for 90 days for product improvement. You can request deletion of your data at any time by emailing <a href="mailto:privacy@lucidprotocol.dev">privacy@lucidprotocol.dev</a>.</p>
+
+      <h2>Cookies</h2>
+      <p>We do not use tracking cookies. The site may use essential session cookies only.</p>
+    </article>
+
+    <footer>
+      <p>&copy; 2025 Lucid Protocol. Built on Aegis.</p>
+    </footer>
+  </div>
+</body>
+</html>
